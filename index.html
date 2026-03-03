@@ -305,6 +305,19 @@
         priceSlider.oninput = function() {
             priceVal.innerHTML = this.value;
         }
+        const sliders = document.querySelectorAll('.slider');
+
+        function updateSliderTrack(slider) {
+            const value = (slider.value - slider.min) / (slider.max - slider.min) * 100;
+            // Applied to the background: Violet from 0 to 'value'%, Light Gray from 'value'% to 100%
+            slider.style.background = `linear-gradient(to right, #57068c 0%, #57068c ${value}%, #e0e0e0 ${value}%, #e0e0e0 100%)`;
+        }
+
+        // Initialize on page load and add listeners for movement
+        sliders.forEach(slider => {
+            updateSliderTrack(slider); // Set initial state
+            slider.addEventListener('input', () => updateSliderTrack(slider));
+        });
     </script>
 </body>
 </html>
