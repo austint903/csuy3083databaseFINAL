@@ -26,19 +26,33 @@
             <button class="btn-lang">Language</button>
         </div>
     </header>
+    <div class="posting-bar NYU-styled">
+        <div class="posting-container">
+            <span class="posting-label">Create Listing:</span>
+            <select class="post-input">
+                <option value="" disabled selected>Select Dining Hall</option>
+                <option value="lipton">Lipton Hall</option>
+                <option value="weinstein">Weinstein Hall</option>
+                <option value="jasper">Jasper Cane Cafe</option>
+                <option value="palladium">Palladium</option>
+            </select>
+            <input type="number" placeholder="Qty" class="post-input small">
+            <input type="text" placeholder="Price" class="post-input small">
+            <button class="btn-post-white">Post Swipe</button>
+        </div>
+    </div>
+
     <div class="promo-banner">
         <div class="banner-image-container">
             <img src="media/Lipton-Horizontal.jpg" alt="Dining Hall Banner" class="full-width-banner">
         </div>
-
         <div class="banner_sub">
             <h2>Here are your listings:</h2>
         </div>
     </div>
-
     <div class="page-layout">
         <aside class="sidebar">
-            <section class="filter-group">
+            <section class="filter-group"> 
                 <h3>List By</h3>
                 <label>Swipe Amount:</label>
                 <select id="sort-swipes" class="dropdown-select">
