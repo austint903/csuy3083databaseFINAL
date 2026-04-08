@@ -193,12 +193,12 @@ export default function SellPage() {
                     </div>
                     <div>
                       <label className="block text-xs text-zinc-500 mb-1">Type</label>
-                      <Select value={form.typeId} onValueChange={(v) => setForm({ ...form, typeId: v })}>
+                      <Select value={form.typeId || "__none__"} onValueChange={(v) => setForm({ ...form, typeId: v === "__none__" ? "" : v })}>
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="Any type" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">Any type</SelectItem>
+                          <SelectItem value="__none__">Any type</SelectItem>
                           {lookups?.types.map((t) => (
                             <SelectItem key={t.type_id} value={t.type_id}>{t.type}</SelectItem>
                           ))}
@@ -207,12 +207,12 @@ export default function SellPage() {
                     </div>
                     <div>
                       <label className="block text-xs text-zinc-500 mb-1">Urgency</label>
-                      <Select value={form.urgencyId} onValueChange={(v) => setForm({ ...form, urgencyId: v })}>
+                      <Select value={form.urgencyId || "__none__"} onValueChange={(v) => setForm({ ...form, urgencyId: v === "__none__" ? "" : v })}>
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="None" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">None</SelectItem>
+                          <SelectItem value="__none__">None</SelectItem>
                           {lookups?.urgencies.map((u) => (
                             <SelectItem key={u.urgency_id} value={u.urgency_id}>{u.urgency}</SelectItem>
                           ))}

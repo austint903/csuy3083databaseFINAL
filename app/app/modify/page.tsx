@@ -260,12 +260,12 @@ export default function ModifyPage() {
 
                         <div>
                           <label className="block text-[10px] uppercase text-zinc-400 tracking-wider mb-1.5">Type</label>
-                          <Select value={state.typeId} onValueChange={(v) => setField(listing.listing_id, "typeId", v)}>
+                          <Select value={state.typeId || "__none__"} onValueChange={(v) => setField(listing.listing_id, "typeId", v === "__none__" ? "" : v)}>
                             <SelectTrigger className="w-full">
                               <SelectValue placeholder="None" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="">None</SelectItem>
+                              <SelectItem value="__none__">None</SelectItem>
                               {lookups?.types.map((t) => (
                                 <SelectItem key={t.type_id} value={t.type_id}>{t.type}</SelectItem>
                               ))}
@@ -275,12 +275,12 @@ export default function ModifyPage() {
 
                         <div>
                           <label className="block text-[10px] uppercase text-zinc-400 tracking-wider mb-1.5">Urgency</label>
-                          <Select value={state.urgencyId} onValueChange={(v) => setField(listing.listing_id, "urgencyId", v)}>
+                          <Select value={state.urgencyId || "__none__"} onValueChange={(v) => setField(listing.listing_id, "urgencyId", v === "__none__" ? "" : v)}>
                             <SelectTrigger className="w-full">
                               <SelectValue placeholder="None" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="">None</SelectItem>
+                              <SelectItem value="__none__">None</SelectItem>
                               {lookups?.urgencies.map((u) => (
                                 <SelectItem key={u.urgency_id} value={u.urgency_id}>{u.urgency}</SelectItem>
                               ))}
