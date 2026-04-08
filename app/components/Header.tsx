@@ -1,0 +1,121 @@
+"use client"
+
+import Link from "next/link"
+import Image from "next/image"
+import { usePathname, useRouter } from "next/navigation"
+import { motion, AnimatePresence } from "framer-motion"
+import { Button } from "@/components/ui/button"
+import { createClient } from "@/utils/supabase/client"
+import { ShoppingCart, Tag, LogIn, LogOut, UtensilsCrossed } from "lucide-react"
+import type { User } from "@supabase/supabase-js"
+
+interface HeaderProps {
+  user: User | null
+}
+
+export function Header({ user }: HeaderProps) {
+  const pathname = usePathname()
+  const router = useRouter()
+
+  const handleSignOut = async () => {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    router.push("/")
+    router.refresh()
+  }
+
+  if (pathname === "/" || pathname === "/login") return null
+
+  const navLinks = [
+    { href: "/buy", label: "Buy Swipes", icon: ShoppingCart },
+    { href: "/sell", label: "Sell Swipes", icon: Tag },
+  ]
+
+  return (
+    <motion.header
+      initial={{ y: -80, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+      className="sticky top-0 z-50 w-full border-b border-zinc-200 bg-white/90 backdrop-blur-md"
+    >
+      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-6">
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-2.5 shrink-0">
+          <div className="w-8 h-8 rounded-lg bg-[#57068c] flex items-center justify-center">
+            <UtensilsCrossed className="w-4 h-4 text-white" />
+          </div>
+          <span className="font-bold text-zinc-900 text-base tracking-tight hidden sm:block">
+            Swipe<span className="text-[#57068c]">Market</span>
+          </span>
+        </Link>
+
+        {/* Nav */}
+        <nav className="flex items-center gap-1">
+          {navLinks.map(({ href, label, icon: Icon }) => {
+            const active = pathname === href
+            return (
+              <Link key={href} href={href}>
+                <button
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-150 cursor-pointer ${
+                    active
+                      ? "bg-[#57068c] text-white shadow-sm"
+                      : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+                  }`}
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                  <span className="hidden sm:block">{label}</span>
+                </button>
+              </Link>
+            )
+          })}
+        </nav>
+
+        {/* Auth */}
+        <div className="flex items-center gap-2 shrink-0">
+          <AnimatePresence mode="wait">
+            {user ? (
+              <motion.div
+                key="user"
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 10 }}
+                className="flex items-center gap-2"
+              >
+                <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-100">
+                  <div className="w-5 h-5 rounded-full bg-[#57068c] flex items-center justify-center">
+                    <span className="text-white text-xs font-bold">
+                      {user.email?.[0].toUpperCase()}
+                    </span>
+                  </div>
+                  <span className="text-xs text-zinc-600 font-medium max-w-28 truncate">
+                    {user.email}
+                  </span>
+                </div>
+                <Button variant="ghost" size="sm" onClick={handleSignOut} className="gap-1.5">
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span className="hidden sm:block">Sign Out</span>
+                </Button>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="guest"
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 10 }}
+              >
+                <Link href="/login">
+                  <Button size="sm" className="gap-1.5">
+                    <LogIn className="w-3.5 h-3.5" />
+                    <span>Log In</span>
+                  </Button>
+                </Link>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+    </motion.header>
+  )
+}
+
+export default Header
