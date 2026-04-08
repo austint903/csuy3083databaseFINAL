@@ -90,6 +90,7 @@ export default function BuyPage() {
   const { data: listings = [], isLoading } = useQuery({
     queryKey: ["listings"],
     queryFn: fetchListings,
+    refetchOnMount: "always",
   })
 
   const sorted = [...listings].sort((a, b) => {
