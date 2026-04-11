@@ -331,19 +331,45 @@ INSERT INTO domain (email_domain) VALUES
 ('upenn.edu')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO "user" (net_id, first_name, last_name, phone_number) VALUES
-('jd1234', 'John', 'Doe', '2125550101'),
-('as5678', 'Alice', 'Smith', '2125550102'),
-('mb9012', 'Mike', 'Brown', '2125550103'),
-('el3456', 'Emma', 'Lee', '2125550104'),
-('rk7890', 'Ryan', 'Kim', '2125550105');
+INSERT INTO "user" (net_id, first_name, last_name, phone_number, school_id) VALUES
+('ak7745', 'Aisha',     'Khan',      '646-555-0203', (SELECT school_id FROM school WHERE school_name = 'New York University')),
+('al9012', 'Alex',      'Liu',       '212-555-0103', (SELECT school_id FROM school WHERE school_name = 'New York University')),
+('at6426', '',          '',          '',             NULL),
+('bo2256', 'Ben',       'Okafor',    '646-555-0204', (SELECT school_id FROM school WHERE school_name = 'New York University')),
+('cf8831', 'Chloe',     'Ferreira',  '646-555-0205', (SELECT school_id FROM school WHERE school_name = 'New York University')),
+('dr7890', 'Dylan',     'Rodriguez', '212-555-0105', (SELECT school_id FROM school WHERE school_name = 'New York University')),
+('ej2345', 'Emma',      'Johnson',   '212-555-0106', (SELECT school_id FROM school WHERE school_name = 'New York University')),
+('hm1174', 'Hassan',    'Mohammed',  '646-555-0206', (SELECT school_id FROM school WHERE school_name = 'New York University')),
+('iy5509', 'Isabel',    'Young',     '646-555-0207', (SELECT school_id FROM school WHERE school_name = 'New York University')),
+('jk1234', 'Jake',      'Kim',       '212-555-0101', (SELECT school_id FROM school WHERE school_name = 'New York University')),
+('kn6643', 'Kevin',     'Nguyen',    '646-555-0208', (SELECT school_id FROM school WHERE school_name = 'New York University')),
+('lv9753', 'Lily',      'Vargas',    '212-555-0110', (SELECT school_id FROM school WHERE school_name = 'New York University')),
+('mb2468', 'Marcus',    'Brown',     '212-555-0109', (SELECT school_id FROM school WHERE school_name = 'New York University')),
+('ms5678', 'Maria',     'Santos',    '212-555-0102', (SELECT school_id FROM school WHERE school_name = 'New York University')),
+('np3456', 'Nina',      'Patel',     '212-555-0104', (SELECT school_id FROM school WHERE school_name = 'New York University')),
+('pl3328', 'Priya',     'Lee',       '646-555-0209', (SELECT school_id FROM school WHERE school_name = 'New York University')),
+('rp4821', 'Riya',      'Pillai',    '646-555-0201', (SELECT school_id FROM school WHERE school_name = 'New York University')),
+('sc1357', 'Sophie',    'Chen',      '212-555-0108', (SELECT school_id FROM school WHERE school_name = 'New York University')),
+('sg9917', 'Samuel',    'Garcia',    '646-555-0210', (SELECT school_id FROM school WHERE school_name = 'New York University')),
+('tw6789', 'Tyler',     'Wang',      '212-555-0107', (SELECT school_id FROM school WHERE school_name = 'New York University')),
+('vm0062', 'Valentina', 'Martinez',  '646-555-0211', (SELECT school_id FROM school WHERE school_name = 'New York University')),
+('wt7734', 'Winston',   'Thompson',  '646-555-0212', (SELECT school_id FROM school WHERE school_name = 'New York University')),
+('xw4415', 'Xiaoming',  'Wu',        '646-555-0213', (SELECT school_id FROM school WHERE school_name = 'New York University')),
+('zc3390', 'Zach',      'Cohen',     '646-555-0202', (SELECT school_id FROM school WHERE school_name = 'New York University'));
 
 INSERT INTO location (location) VALUES
-('Third North Dining Hall'),
-('Weinstein Dining Hall'),
+('Café 181 (Paulson Center, 2nd Fl)'),
+('Café 370 (370 Jay St, Brooklyn)'),
+('Crave NYU (Paulson Center, 6th Fl)'),
+('Downstein (Weinstein Hall)'),
+('Dunkin'' (UHall, Union Square)'),
+('Jasper Kane Café (Brooklyn)'),
 ('Lipton Dining Hall'),
 ('Palladium Dining Hall'),
-('Brittany Dining Hall');
+('The Marketplace at Kimmel'),
+('Third North Dining Hall'),
+('True Burger (Paulson Center, 6th Fl)'),
+('Upstein (Weinstein Hall)');
 
 INSERT INTO urgency (urgency) VALUES
 ('Urgent'),
@@ -362,23 +388,35 @@ INSERT INTO urgency (urgency) VALUES
 ON CONFLICT DO NOTHING;
 
 INSERT INTO type (type, semester_valid) VALUES
-('Guest Meal', 'Spring 2026'),
-('Dining Dollar', 'Spring 2026'),
-('Meal Swipe', 'Spring 2026'),
-('Weekly Swipe', 'Spring 2026'),
-('Faculty Meal', 'Spring 2026'),
-('Late Night Swipe', 'Spring 2026'),
-('Brunch Swipe', 'Fall 2026'),
-('Summer Dining Credit', 'Summer 2026'),
-('Catering Credit', 'Spring 2026'),
-('Commuter Meal', 'Fall 2026')
+('Brunch Swipe',        'Fall 2026'),
+('Buffet Entry',        'Spring 2026'),
+('Catering Credit',     'Spring 2026'),
+('Commuter Meal',       'Fall 2026'),
+('Dining Dollar',       'Spring 2026'),
+('Dining Swipe',        'Spring 2026'),
+('Faculty Meal',        'Spring 2026'),
+('Flex Points',         'Spring 2026'),
+('Guest Meal',          'Spring 2026'),
+('Guest Swipe',         'Spring 2026'),
+('Late Night Swipe',    'Spring 2026'),
+('Meal Swipe',          'Spring 2026'),
+('Summer Dining Credit','Summer 2026'),
+('Transfer Guest Swipe','Spring 2026'),
+('Weekly Swipe',        'Spring 2026')
 ON CONFLICT DO NOTHING;
 
 INSERT INTO discount (discount_rate, begin_date, end_date) VALUES
 (0.0000, '2026-01-01 00:00:00+00', '2026-12-31 23:59:59+00'),
-(0.1000, '2026-01-15 00:00:00+00', '2026-05-15 23:59:59+00'),
-(0.2000, '2026-02-01 00:00:00+00', '2026-06-30 23:59:59+00'),
-(0.1500, '2026-03-01 00:00:00+00', '2026-08-31 23:59:59+00');
+(0.0500, '2026-03-01 00:00:00+00', '2026-05-31 00:00:00+00'),
+(0.0750, '2026-01-15 00:00:00+00', '2026-05-15 23:59:59+00'),
+(0.1000, '2026-01-01 00:00:00+00', '2026-05-31 00:00:00+00'),
+(0.1250, '2026-02-01 00:00:00+00', '2026-06-30 23:59:59+00'),
+(0.1500, '2026-01-01 00:00:00+00', '2026-05-31 00:00:00+00'),
+(0.1750, '2026-03-01 00:00:00+00', '2026-08-31 23:59:59+00'),
+(0.2000, '2026-02-01 00:00:00+00', '2026-04-30 00:00:00+00'),
+(0.2500, '2026-04-01 00:00:00+00', '2026-04-30 00:00:00+00'),
+(0.3000, '2026-04-01 00:00:00+00', '2026-07-31 23:59:59+00'),
+(0.5000, '2026-04-01 00:00:00+00', '2026-05-31 23:59:59+00');
 
 INSERT INTO status (status_name) VALUES
 ('Pending'),
@@ -394,103 +432,87 @@ INSERT INTO status (status_name) VALUES
 ('In Transit')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO listing (seller_net_id, preferred_location_id, urgency_id, type_id, discount_id, amount, price, is_active, posted_date, expiration_date)
-VALUES (
-    'jd1234',
-    (SELECT location_id FROM location WHERE location = 'Third North Dining Hall'),
-    (SELECT urgency_id FROM urgency WHERE urgency = 'Medium'),
-    (SELECT type_id FROM type WHERE type = 'Meal Swipe'),
-    (SELECT discount_id FROM discount WHERE discount_rate = 0.0000 LIMIT 1),
-    '3', 5.00, TRUE, '2026-04-01 10:00:00+00', '2026-05-01 10:00:00+00'
-);
+INSERT INTO listing (seller_net_id, preferred_location_id, urgency_id, type_id, discount_id, amount, price, is_active, posted_date, expiration_date) VALUES
+('xw4415', (SELECT location_id FROM location WHERE location = 'The Marketplace at Kimmel'),      (SELECT urgency_id FROM urgency WHERE urgency = 'Urgent'),   (SELECT type_id FROM type WHERE type = 'Guest Swipe'),         (SELECT discount_id FROM discount WHERE discount_rate = 0.2000 LIMIT 1), '1', 7.00,   FALSE, '2026-04-04 17:00:00+00', '2026-04-11 17:00:00+00'),
+('wt7734', (SELECT location_id FROM location WHERE location = 'Third North Dining Hall'),         (SELECT urgency_id FROM urgency WHERE urgency = 'No Rush'),  (SELECT type_id FROM type WHERE type = 'Dining Swipe'),        NULL,                                                                    '4', 4.75,   FALSE, '2026-04-05 09:00:00+00', '2026-05-05 09:00:00+00'),
+('dr7890', (SELECT location_id FROM location WHERE location = 'Crave NYU (Paulson Center, 6th Fl)'),(SELECT urgency_id FROM urgency WHERE urgency = 'High'),   (SELECT type_id FROM type WHERE type = 'Guest Swipe'),         (SELECT discount_id FROM discount WHERE discount_rate = 0.1500 LIMIT 1), '1', 8.00,   TRUE,  '2026-04-05 11:45:00+00', '2026-05-05 11:45:00+00'),
+('iy5509', (SELECT location_id FROM location WHERE location = 'Downstein (Weinstein Hall)'),      (SELECT urgency_id FROM urgency WHERE urgency = 'No Rush'),  (SELECT type_id FROM type WHERE type = 'Dining Swipe'),        NULL,                                                                    '6', 3.75,   TRUE,  '2026-04-06 10:00:00+00', '2026-05-06 10:00:00+00'),
+('lv9753', (SELECT location_id FROM location WHERE location = 'Lipton Dining Hall'),              (SELECT urgency_id FROM urgency WHERE urgency = 'Low'),      (SELECT type_id FROM type WHERE type = 'Dining Swipe'),        NULL,                                                                    '8', 3.50,   FALSE, '2026-04-06 12:00:00+00', '2026-05-06 12:00:00+00'),
+('np3456', (SELECT location_id FROM location WHERE location = 'Palladium Dining Hall'),           (SELECT urgency_id FROM urgency WHERE urgency = 'Low'),      (SELECT type_id FROM type WHERE type = 'Dining Swipe'),        NULL,                                                                    '5', 4.50,   TRUE,  '2026-04-06 16:00:00+00', '2026-05-06 16:00:00+00'),
+('pl3328', (SELECT location_id FROM location WHERE location = 'Upstein (Weinstein Hall)'),        (SELECT urgency_id FROM urgency WHERE urgency = 'Low'),      (SELECT type_id FROM type WHERE type = 'Dining Swipe'),        NULL,                                                                    '5', 4.50,   TRUE,  '2026-04-07 12:00:00+00', '2026-05-07 12:00:00+00'),
+('ms5678', (SELECT location_id FROM location WHERE location = 'Crave NYU (Paulson Center, 6th Fl)'),(SELECT urgency_id FROM urgency WHERE urgency = 'High'),   (SELECT type_id FROM type WHERE type = 'Dining Swipe'),        (SELECT discount_id FROM discount WHERE discount_rate = 0.1000 LIMIT 1), '3', 5.50,   TRUE,  '2026-04-07 14:30:00+00', '2026-05-07 14:30:00+00'),
+('ak7745', (SELECT location_id FROM location WHERE location = 'Downstein (Weinstein Hall)'),      (SELECT urgency_id FROM urgency WHERE urgency = 'No Rush'),  (SELECT type_id FROM type WHERE type = 'Dining Swipe'),        NULL,                                                                    '4', 4.00,   TRUE,  '2026-04-07 15:00:00+00', '2026-05-07 15:00:00+00'),
+('sc1357', (SELECT location_id FROM location WHERE location = 'Third North Dining Hall'),         (SELECT urgency_id FROM urgency WHERE urgency = 'No Rush'),  (SELECT type_id FROM type WHERE type = 'Dining Swipe'),        NULL,                                                                    '6', 4.00,   TRUE,  '2026-04-07 17:30:00+00', '2026-05-07 17:30:00+00'),
+('zc3390', (SELECT location_id FROM location WHERE location = 'Third North Dining Hall'),         (SELECT urgency_id FROM urgency WHERE urgency = 'High'),     (SELECT type_id FROM type WHERE type = 'Guest Swipe'),         (SELECT discount_id FROM discount WHERE discount_rate = 0.1000 LIMIT 1), '1', 6.50,   TRUE,  '2026-04-08 09:30:00+00', '2026-05-08 09:30:00+00'),
+('jk1234', (SELECT location_id FROM location WHERE location = 'Third North Dining Hall'),         (SELECT urgency_id FROM urgency WHERE urgency = 'Medium'),   (SELECT type_id FROM type WHERE type = 'Guest Swipe'),         NULL,                                                                    '2', 6.00,   TRUE,  '2026-04-08 10:00:00+00', '2026-05-08 10:00:00+00'),
+('tw6789', (SELECT location_id FROM location WHERE location = 'Dunkin'' (UHall, Union Square)'),  (SELECT urgency_id FROM urgency WHERE urgency = 'Medium'),   (SELECT type_id FROM type WHERE type = 'Buffet Entry'),        (SELECT discount_id FROM discount WHERE discount_rate = 0.2000 LIMIT 1), '2', 6.50,   TRUE,  '2026-04-08 13:20:00+00', '2026-05-08 13:20:00+00'),
+('sg9917', (SELECT location_id FROM location WHERE location = 'Downstein (Weinstein Hall)'),      (SELECT urgency_id FROM urgency WHERE urgency = 'Medium'),   (SELECT type_id FROM type WHERE type = 'Buffet Entry'),        (SELECT discount_id FROM discount WHERE discount_rate = 0.1000 LIMIT 1), '2', 5.25,   TRUE,  '2026-04-08 14:30:00+00', '2026-05-08 14:30:00+00'),
+('hm1174', (SELECT location_id FROM location WHERE location = 'The Marketplace at Kimmel'),      (SELECT urgency_id FROM urgency WHERE urgency = 'Low'),      (SELECT type_id FROM type WHERE type = 'Guest Swipe'),         NULL,                                                                    '2', 6.00,   TRUE,  '2026-04-08 16:45:00+00', '2026-05-08 16:45:00+00'),
+('mb2468', (SELECT location_id FROM location WHERE location = 'Downstein (Weinstein Hall)'),      (SELECT urgency_id FROM urgency WHERE urgency = 'Urgent'),   (SELECT type_id FROM type WHERE type = 'Guest Swipe'),         (SELECT discount_id FROM discount WHERE discount_rate = 0.0500 LIMIT 1), '1', 7.50,   FALSE, '2026-04-09 07:00:00+00', '2026-04-15 07:00:00+00'),
+('ej2345', (SELECT location_id FROM location WHERE location = 'The Marketplace at Kimmel'),      (SELECT urgency_id FROM urgency WHERE urgency = 'No Rush'),  (SELECT type_id FROM type WHERE type = 'Dining Swipe'),        NULL,                                                                    '4', 5.00,   TRUE,  '2026-04-09 08:00:00+00', '2026-05-09 08:00:00+00'),
+('kn6643', (SELECT location_id FROM location WHERE location = 'Downstein (Weinstein Hall)'),      (SELECT urgency_id FROM urgency WHERE urgency = 'High'),     (SELECT type_id FROM type WHERE type = 'Transfer Guest Swipe'),(SELECT discount_id FROM discount WHERE discount_rate = 0.1500 LIMIT 1), '1', 8.00,   TRUE,  '2026-04-09 08:15:00+00', '2026-04-14 08:15:00+00'),
+('al9012', (SELECT location_id FROM location WHERE location = 'Lipton Dining Hall'),              (SELECT urgency_id FROM urgency WHERE urgency = 'Urgent'),   (SELECT type_id FROM type WHERE type = 'Buffet Entry'),        (SELECT discount_id FROM discount WHERE discount_rate = 0.2500 LIMIT 1), '1', 7.00,   TRUE,  '2026-04-09 09:15:00+00', '2026-04-16 09:15:00+00'),
+('vm0062', (SELECT location_id FROM location WHERE location = 'Downstein (Weinstein Hall)'),      (SELECT urgency_id FROM urgency WHERE urgency = 'High'),     (SELECT type_id FROM type WHERE type = 'Dining Swipe'),        NULL,                                                                    '3', 6.00,   TRUE,  '2026-04-09 10:30:00+00', '2026-05-09 10:30:00+00'),
+('rp4821', (SELECT location_id FROM location WHERE location = 'Downstein (Weinstein Hall)'),      (SELECT urgency_id FROM urgency WHERE urgency = 'Medium'),   (SELECT type_id FROM type WHERE type = 'Dining Swipe'),        NULL,                                                                    '2', 5.00,   TRUE,  '2026-04-09 11:00:00+00', '2026-05-09 11:00:00+00'),
+('cf8831', (SELECT location_id FROM location WHERE location = 'Palladium Dining Hall'),           (SELECT urgency_id FROM urgency WHERE urgency = 'Medium'),   (SELECT type_id FROM type WHERE type = 'Dining Swipe'),        (SELECT discount_id FROM discount WHERE discount_rate = 0.0500 LIMIT 1), '3', 5.50,   TRUE,  '2026-04-09 13:00:00+00', '2026-05-09 13:00:00+00'),
+('bo2256', (SELECT location_id FROM location WHERE location = 'Lipton Dining Hall'),              (SELECT urgency_id FROM urgency WHERE urgency = 'Urgent'),   (SELECT type_id FROM type WHERE type = 'Buffet Entry'),        (SELECT discount_id FROM discount WHERE discount_rate = 0.2500 LIMIT 1), '1', 7.50,   TRUE,  '2026-04-10 07:30:00+00', '2026-04-17 07:30:00+00'),
+('at6426', (SELECT location_id FROM location WHERE location = 'Downstein (Weinstein Hall)'),      (SELECT urgency_id FROM urgency WHERE urgency = 'Medium'),   (SELECT type_id FROM type WHERE type = 'Dining Swipe'),        NULL,                                                                    '1', 111.00, TRUE,  '2026-04-11 02:09:29+00', '2026-05-11 02:09:29+00');
 
-INSERT INTO listing (seller_net_id, preferred_location_id, urgency_id, type_id, discount_id, amount, price, is_active, posted_date, expiration_date)
-VALUES (
-    'as5678',
-    (SELECT location_id FROM location WHERE location = 'Weinstein Dining Hall'),
-    (SELECT urgency_id FROM urgency WHERE urgency = 'Urgent'),
-    (SELECT type_id FROM type WHERE type = 'Guest Meal'),
-    (SELECT discount_id FROM discount WHERE discount_rate = 0.1000 LIMIT 1),
-    '1', 4.00, TRUE, '2026-04-02 11:00:00+00', '2026-05-02 11:00:00+00'
-);
-
-INSERT INTO listing (seller_net_id, preferred_location_id, urgency_id, type_id, discount_id, amount, price, is_active, posted_date, expiration_date)
-VALUES (
-    'mb9012',
-    (SELECT location_id FROM location WHERE location = 'Lipton Dining Hall'),
-    (SELECT urgency_id FROM urgency WHERE urgency = 'No Rush'),
-    (SELECT type_id FROM type WHERE type = 'Dining Dollar'),
-    (SELECT discount_id FROM discount WHERE discount_rate = 0.2000 LIMIT 1),
-    '5', 6.50, TRUE, '2026-04-03 09:00:00+00', '2026-05-03 09:00:00+00'
-);
-
-INSERT INTO listing (seller_net_id, preferred_location_id, urgency_id, type_id, discount_id, amount, price, is_active, posted_date, expiration_date)
-VALUES (
-    'el3456',
-    (SELECT location_id FROM location WHERE location = 'Palladium Dining Hall'),
-    (SELECT urgency_id FROM urgency WHERE urgency = 'High'),
-    (SELECT type_id FROM type WHERE type = 'Weekly Swipe'),
-    (SELECT discount_id FROM discount WHERE discount_rate = 0.1500 LIMIT 1),
-    '2', 4.50, TRUE, '2026-04-04 14:00:00+00', '2026-05-04 14:00:00+00'
-);
-
-INSERT INTO listing (seller_net_id, preferred_location_id, urgency_id, type_id, discount_id, amount, price, is_active, posted_date, expiration_date)
-VALUES (
-    'rk7890',
-    (SELECT location_id FROM location WHERE location = 'Brittany Dining Hall'),
-    (SELECT urgency_id FROM urgency WHERE urgency = 'Low'),
-    (SELECT type_id FROM type WHERE type = 'Meal Swipe'),
-    (SELECT discount_id FROM discount WHERE discount_rate = 0.0000 LIMIT 1),
-    '4', 5.50, FALSE, '2026-03-20 08:00:00+00', '2026-04-20 08:00:00+00'
-);
-
-INSERT INTO transaction (buyer_id, listing_id, status_id, buyer_confirm, seller_confirm, transaction_time)
-VALUES (
-    'as5678',
-    (SELECT listing_id FROM listing WHERE seller_net_id = 'jd1234' LIMIT 1),
-    (SELECT status_id FROM status WHERE status_name = 'Confirmed'),
-    TRUE, TRUE, '2026-04-05 12:00:00+00'
-);
-
-INSERT INTO transaction (buyer_id, listing_id, status_id, buyer_confirm, seller_confirm, transaction_time)
-VALUES (
-    'rk7890',
-    (SELECT listing_id FROM listing WHERE seller_net_id = 'as5678' LIMIT 1),
-    (SELECT status_id FROM status WHERE status_name = 'Pending'),
-    FALSE, FALSE, '2026-04-06 13:00:00+00'
-);
-
-INSERT INTO transaction (buyer_id, listing_id, status_id, buyer_confirm, seller_confirm, transaction_time)
-VALUES (
-    'jd1234',
-    (SELECT listing_id FROM listing WHERE seller_net_id = 'mb9012' LIMIT 1),
-    (SELECT status_id FROM status WHERE status_name = 'Completed'),
-    TRUE, TRUE, '2026-04-07 15:00:00+00'
-);
-
-INSERT INTO transaction (buyer_id, listing_id, status_id, buyer_confirm, seller_confirm, transaction_time)
-VALUES (
-    'mb9012',
-    (SELECT listing_id FROM listing WHERE seller_net_id = 'el3456' LIMIT 1),
-    (SELECT status_id FROM status WHERE status_name = 'Cancelled'),
-    FALSE, FALSE, '2026-04-08 10:00:00+00'
-);
-
-INSERT INTO transaction (buyer_id, listing_id, status_id, buyer_confirm, seller_confirm, transaction_time)
-VALUES (
-    'el3456',
-    (SELECT listing_id FROM listing WHERE seller_net_id = 'jd1234' LIMIT 1),
-    (SELECT status_id FROM status WHERE status_name = 'Pending'),
-    FALSE, FALSE, '2026-04-09 16:00:00+00'
-);
+INSERT INTO transaction (buyer_id, listing_id, status_id, buyer_confirm, seller_confirm, transaction_time) VALUES
+('al9012', (SELECT listing_id FROM listing WHERE seller_net_id = 'lv9753' AND posted_date = '2026-04-06 12:00:00+00'), (SELECT status_id FROM status WHERE status_name = 'Completed'), TRUE,  TRUE,  '2026-04-05 15:30:00+00'),
+('ms5678', (SELECT listing_id FROM listing WHERE seller_net_id = 'xw4415' AND posted_date = '2026-04-04 17:00:00+00'), (SELECT status_id FROM status WHERE status_name = 'Completed'), TRUE,  TRUE,  '2026-04-05 18:00:00+00'),
+('jk1234', (SELECT listing_id FROM listing WHERE seller_net_id = 'wt7734' AND posted_date = '2026-04-05 09:00:00+00'), (SELECT status_id FROM status WHERE status_name = 'Completed'), TRUE,  TRUE,  '2026-04-06 11:00:00+00'),
+('dr7890', (SELECT listing_id FROM listing WHERE seller_net_id = 'mb2468' AND posted_date = '2026-04-09 07:00:00+00'), (SELECT status_id FROM status WHERE status_name = 'Completed'), TRUE,  TRUE,  '2026-04-06 12:00:00+00'),
+('lv9753', (SELECT listing_id FROM listing WHERE seller_net_id = 'ej2345' AND posted_date = '2026-04-09 08:00:00+00'), (SELECT status_id FROM status WHERE status_name = 'Completed'), TRUE,  TRUE,  '2026-04-07 14:00:00+00'),
+('rp4821', (SELECT listing_id FROM listing WHERE seller_net_id = 'iy5509' AND posted_date = '2026-04-06 10:00:00+00'), (SELECT status_id FROM status WHERE status_name = 'Cancelled'), FALSE, FALSE, '2026-04-07 16:00:00+00'),
+('lv9753', (SELECT listing_id FROM listing WHERE seller_net_id = 'ak7745' AND posted_date = '2026-04-07 15:00:00+00'), (SELECT status_id FROM status WHERE status_name = 'Cancelled'), FALSE, FALSE, '2026-04-08 12:00:00+00'),
+('ej2345', (SELECT listing_id FROM listing WHERE seller_net_id = 'tw6789' AND posted_date = '2026-04-08 13:20:00+00'), (SELECT status_id FROM status WHERE status_name = 'Confirmed'), FALSE, TRUE,  '2026-04-08 16:00:00+00'),
+('np3456', (SELECT listing_id FROM listing WHERE seller_net_id = 'kn6643' AND posted_date = '2026-04-09 08:15:00+00'), (SELECT status_id FROM status WHERE status_name = 'Confirmed'), FALSE, TRUE,  '2026-04-09 09:00:00+00'),
+('jk1234', (SELECT listing_id FROM listing WHERE seller_net_id = 'dr7890' AND posted_date = '2026-04-05 11:45:00+00'), (SELECT status_id FROM status WHERE status_name = 'Confirmed'), FALSE, TRUE,  '2026-04-09 10:00:00+00'),
+('sc1357', (SELECT listing_id FROM listing WHERE seller_net_id = 'al9012' AND posted_date = '2026-04-09 09:15:00+00'), (SELECT status_id FROM status WHERE status_name = 'Cancelled'), FALSE, FALSE, '2026-04-09 11:00:00+00'),
+('al9012', (SELECT listing_id FROM listing WHERE seller_net_id = 'rp4821' AND posted_date = '2026-04-09 11:00:00+00'), (SELECT status_id FROM status WHERE status_name = 'Confirmed'), FALSE, TRUE,  '2026-04-09 14:00:00+00'),
+('dr7890', (SELECT listing_id FROM listing WHERE seller_net_id = 'cf8831' AND posted_date = '2026-04-09 13:00:00+00'), (SELECT status_id FROM status WHERE status_name = 'Confirmed'), TRUE,  TRUE,  '2026-04-09 15:30:00+00'),
+('np3456', (SELECT listing_id FROM listing WHERE seller_net_id = 'sc1357' AND posted_date = '2026-04-07 17:30:00+00'), (SELECT status_id FROM status WHERE status_name = 'Confirmed'), FALSE, TRUE,  '2026-04-09 18:00:00+00'),
+('mb2468', (SELECT listing_id FROM listing WHERE seller_net_id = 'jk1234' AND posted_date = '2026-04-08 10:00:00+00'), (SELECT status_id FROM status WHERE status_name = 'Pending'),   FALSE, FALSE, '2026-04-10 07:00:00+00'),
+('tw6789', (SELECT listing_id FROM listing WHERE seller_net_id = 'bo2256' AND posted_date = '2026-04-10 07:30:00+00'), (SELECT status_id FROM status WHERE status_name = 'Pending'),   FALSE, FALSE, '2026-04-10 07:45:00+00'),
+('ms5678', (SELECT listing_id FROM listing WHERE seller_net_id = 'np3456' AND posted_date = '2026-04-06 16:00:00+00'), (SELECT status_id FROM status WHERE status_name = 'Pending'),   FALSE, FALSE, '2026-04-10 08:00:00+00'),
+('ej2345', (SELECT listing_id FROM listing WHERE seller_net_id = 'zc3390' AND posted_date = '2026-04-08 09:30:00+00'), (SELECT status_id FROM status WHERE status_name = 'Pending'),   FALSE, FALSE, '2026-04-10 08:30:00+00'),
+('sc1357', (SELECT listing_id FROM listing WHERE seller_net_id = 'hm1174' AND posted_date = '2026-04-08 16:45:00+00'), (SELECT status_id FROM status WHERE status_name = 'Pending'),   FALSE, FALSE, '2026-04-10 09:00:00+00'),
+('tw6789', (SELECT listing_id FROM listing WHERE seller_net_id = 'ms5678' AND posted_date = '2026-04-07 14:30:00+00'), (SELECT status_id FROM status WHERE status_name = 'Pending'),   FALSE, FALSE, '2026-04-10 09:30:00+00'),
+('mb2468', (SELECT listing_id FROM listing WHERE seller_net_id = 'vm0062' AND posted_date = '2026-04-09 10:30:00+00'), (SELECT status_id FROM status WHERE status_name = 'Pending'),   FALSE, FALSE, '2026-04-10 10:00:00+00'),
+('at6426', (SELECT listing_id FROM listing WHERE seller_net_id = 'al9012' AND posted_date = '2026-04-09 09:15:00+00'), (SELECT status_id FROM status WHERE status_name = 'Pending'),   FALSE, FALSE, '2026-04-11 02:09:12+00');
 
 INSERT INTO comment (rating, comment, transaction_id) VALUES
-(4.5, 'Great transaction, smooth and easy!',
-    (SELECT transaction_id FROM transaction WHERE buyer_id = 'as5678' LIMIT 1)),
-(5.0, 'Seller was very responsive and reliable.',
-    (SELECT transaction_id FROM transaction WHERE buyer_id = 'jd1234' LIMIT 1)),
-(3.0, 'Transaction was okay, took a bit longer than expected.',
-    (SELECT transaction_id FROM transaction WHERE buyer_id = 'mb9012' LIMIT 1));
+-- Transaction: al9012 bought from lv9753 (Completed, 2026-04-05 15:30)
+(4.0, 'Solid transaction. Met at the right spot, no drama. Would use SwipeMarket again for sure.',       (SELECT transaction_id FROM transaction WHERE buyer_id = 'al9012' AND transaction_time = '2026-04-05 15:30:00+00')),
+(4.5, 'Super easy swap at Third North, Jake was on time!',                                               (SELECT transaction_id FROM transaction WHERE buyer_id = 'al9012' AND transaction_time = '2026-04-05 15:30:00+00')),
+(5.0, 'lv9753 was amazing, super fast and easy swap at Third North. Buffet was still open too!',         (SELECT transaction_id FROM transaction WHERE buyer_id = 'al9012' AND transaction_time = '2026-04-05 15:30:00+00')),
+-- Transaction: ms5678 bought from xw4415 (Completed, 2026-04-05 18:00)
+(4.0, 'Quick and easy. Buffet entry swipe at Weinstein, no fuss. Will buy again.',                      (SELECT transaction_id FROM transaction WHERE buyer_id = 'ms5678' AND transaction_time = '2026-04-05 18:00:00+00')),
+(5.0, 'xw4415 is the best seller on here. Super chill, met me at Kimmel, whole thing took 2 minutes.',  (SELECT transaction_id FROM transaction WHERE buyer_id = 'ms5678' AND transaction_time = '2026-04-05 18:00:00+00')),
+(4.5, 'Xw4415 was a bit late to Kimmel but overall smooth swap, no issues.',                             (SELECT transaction_id FROM transaction WHERE buyer_id = 'ms5678' AND transaction_time = '2026-04-05 18:00:00+00')),
+-- Transaction: jk1234 bought from wt7734 (Completed, 2026-04-06 11:00)
+(5.0, 'Wt7734 was super chill, met at Third North right on time. Would def buy again!',                  (SELECT transaction_id FROM transaction WHERE buyer_id = 'jk1234' AND transaction_time = '2026-04-06 11:00:00+00')),
+(2.5, 'Swipe worked but the seller was 15 min late. Communication could be better. Still got my meal.',  (SELECT transaction_id FROM transaction WHERE buyer_id = 'jk1234' AND transaction_time = '2026-04-06 11:00:00+00')),
+(4.5, 'wt7734 was responsive on the app and showed up at Third North exactly when planned.',              (SELECT transaction_id FROM transaction WHERE buyer_id = 'jk1234' AND transaction_time = '2026-04-06 11:00:00+00')),
+-- Transaction: dr7890 bought from mb2468 (Completed, 2026-04-06 12:00)
+(5.0, 'mb2468 came through clutch. I was starving and he showed up in like 5 minutes. 10/10',            (SELECT transaction_id FROM transaction WHERE buyer_id = 'dr7890' AND transaction_time = '2026-04-06 12:00:00+00')),
+(5.0, 'Marcus was great, met at Sarge''s exactly when planned.',                                         (SELECT transaction_id FROM transaction WHERE buyer_id = 'dr7890' AND transaction_time = '2026-04-06 12:00:00+00')),
+(4.5, 'Great seller, Sarge''s was a perfect meetup spot. Very professional.',                             (SELECT transaction_id FROM transaction WHERE buyer_id = 'dr7890' AND transaction_time = '2026-04-06 12:00:00+00')),
+-- Transaction: lv9753 bought from ej2345 (Completed, 2026-04-07 14:00)
+(5.0, 'Honestly one of the smoothest swaps I''ve done. Buyer confirmed immediately, no issues at all.',  (SELECT transaction_id FROM transaction WHERE buyer_id = 'lv9753' AND transaction_time = '2026-04-07 14:00:00+00')),
+(4.0, 'Good experience at Kimmel, smooth transaction with Emma.',                                         (SELECT transaction_id FROM transaction WHERE buyer_id = 'lv9753' AND transaction_time = '2026-04-07 14:00:00+00')),
+(3.0, 'ej2345 took a while to show at Kimmel but eventually came through. Swipe worked fine.',            (SELECT transaction_id FROM transaction WHERE buyer_id = 'lv9753' AND transaction_time = '2026-04-07 14:00:00+00')),
+-- Transaction: al9012 bought from rp4821 (Confirmed, 2026-04-09 14:00)
+(4.0, 'Good experience at Weinstein buffet. Seller was friendly and on time!',                            (SELECT transaction_id FROM transaction WHERE buyer_id = 'al9012' AND transaction_time = '2026-04-09 14:00:00+00')),
+(4.5, 'Really smooth swap at Bobst area. Seller came right away and the swipe worked first try.',         (SELECT transaction_id FROM transaction WHERE buyer_id = 'al9012' AND transaction_time = '2026-04-09 14:00:00+00')),
+(4.0, 'Good vibes. Seller was chill, location was convenient, would recommend this app.',                 (SELECT transaction_id FROM transaction WHERE buyer_id = 'al9012' AND transaction_time = '2026-04-09 14:00:00+00')),
+(5.0, 'Literally the easiest way to get into Lipton buffet without using your own swipes. 10/10.',        (SELECT transaction_id FROM transaction WHERE buyer_id = 'al9012' AND transaction_time = '2026-04-09 14:00:00+00')),
+-- Transaction: dr7890 bought from cf8831 (Confirmed, 2026-04-09 15:30)
+(3.5, 'Transaction went ok at Palladium. Took a while to coordinate but got there.',                     (SELECT transaction_id FROM transaction WHERE buyer_id = 'dr7890' AND transaction_time = '2026-04-09 15:30:00+00')),
+(5.0, 'Weinstein buffet for $6.50 is an absolute steal. Seller was super friendly and on time!',          (SELECT transaction_id FROM transaction WHERE buyer_id = 'dr7890' AND transaction_time = '2026-04-09 15:30:00+00')),
+(3.5, 'Decent experience overall. Palladium buffet was worth it. Seller was a little hard to reach.',     (SELECT transaction_id FROM transaction WHERE buyer_id = 'dr7890' AND transaction_time = '2026-04-09 15:30:00+00')),
+(5.0, 'Dr7890 confirmed receipt super fast. Best buyer I''ve had, very responsive.',                      (SELECT transaction_id FROM transaction WHERE buyer_id = 'dr7890' AND transaction_time = '2026-04-09 15:30:00+00'));
 
 -- =============================================
 -- INSERT TEMPLATE STATEMENTS (used in app)
