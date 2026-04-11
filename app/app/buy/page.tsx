@@ -32,9 +32,11 @@ interface Listing {
 
 type SortOption = "price_asc" | "price_desc" | "amount_asc" | "amount_desc" | "newest"
 
+// Buffet = all-you-care-to-eat (one swipe covers everything)
+// Downstein and Third North are the main buffets; Lipton and Palladium also buffet-style
 const BUFFET_HALLS = new Set([
   "Third North Dining Hall",
-  "Weinstein Dining Hall",
+  "Downstein (Weinstein Hall)",
   "Lipton Dining Hall",
   "Palladium Dining Hall",
 ])
