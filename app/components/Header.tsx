@@ -1,12 +1,12 @@
 "use client"
 
 import Link from "next/link"
-import Image from "next/image"
 import { usePathname, useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { createClient } from "@/utils/supabase/client"
-import { ShoppingCart, Tag, LogIn, LogOut, UtensilsCrossed } from "lucide-react"
+import { ShoppingCart, Tag, LogIn, LogOut, UtensilsCrossed, UserCircle } from "lucide-react"
 import type { User } from "@supabase/supabase-js"
 
 interface HeaderProps {
@@ -16,6 +16,33 @@ interface HeaderProps {
 export function Header({ user }: HeaderProps) {
   const pathname = usePathname()
   const router = useRouter()
+  const [pendingCount, setPendingCount] = useState(0)
+
+  const netId = user?.email?.split("@")[0] ?? null
+
+  // Fetch pending incoming orders for the badge
+  useEffect(() => {
+    if (!netId) return
+    const supabase = createClient()
+    async function loadPending() {
+      // Get seller's listing IDs then count pending transactions
+      const { data: listings } = await supabase
+        .from("listing")
+        .select("listing_id")
+        .eq("seller_net_id", netId)
+      if (!listings || listings.length === 0) return
+      const ids = listings.map((l: any) => l.listing_id)
+      const { data: statuses } = await supabase.from("status").select("status_id").eq("status_name", "Pending").single()
+      if (!statuses) return
+      const { count } = await supabase
+        .from("transaction")
+        .select("transaction_id", { count: "exact", head: true })
+        .in("listing_id", ids)
+        .eq("status_id", (statuses as any).status_id)
+      setPendingCount(count ?? 0)
+    }
+    loadPending()
+  }, [netId])
 
   const handleSignOut = async () => {
     const supabase = createClient()
@@ -27,8 +54,9 @@ export function Header({ user }: HeaderProps) {
   if (pathname === "/" || pathname === "/login") return null
 
   const navLinks = [
-    { href: "/buy", label: "Buy Swipes", icon: ShoppingCart },
-    { href: "/sell", label: "Sell Swipes", icon: Tag },
+    { href: "/buy",  label: "Buy Swipes",  icon: ShoppingCart, badge: 0 },
+    { href: "/sell", label: "Sell Swipes", icon: Tag,          badge: 0 },
+    ...(user ? [{ href: "/profile", label: "Profile", icon: UserCircle, badge: pendingCount }] : []),
   ]
 
   return (
@@ -51,12 +79,12 @@ export function Header({ user }: HeaderProps) {
 
         {/* Nav */}
         <nav className="flex items-center gap-1">
-          {navLinks.map(({ href, label, icon: Icon }) => {
-            const active = pathname === href
+          {navLinks.map(({ href, label, icon: Icon, badge }) => {
+            const active = pathname.startsWith(href)
             return (
               <Link key={href} href={href}>
                 <button
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-150 cursor-pointer ${
+                  className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-150 cursor-pointer ${
                     active
                       ? "bg-[#57068c] text-white shadow-sm"
                       : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
@@ -64,6 +92,11 @@ export function Header({ user }: HeaderProps) {
                 >
                   <Icon className="w-3.5 h-3.5" />
                   <span className="hidden sm:block">{label}</span>
+                  {badge > 0 && (
+                    <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[9px] font-black flex items-center justify-center">
+                      {badge > 9 ? "9+" : badge}
+                    </span>
+                  )}
                 </button>
               </Link>
             )
@@ -81,16 +114,18 @@ export function Header({ user }: HeaderProps) {
                 exit={{ opacity: 0, x: 10 }}
                 className="flex items-center gap-2"
               >
-                <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-100">
-                  <div className="w-5 h-5 rounded-full bg-[#57068c] flex items-center justify-center">
-                    <span className="text-white text-xs font-bold">
-                      {user.email?.[0].toUpperCase()}
+                <Link href="/profile">
+                  <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 transition-colors cursor-pointer">
+                    <div className="w-5 h-5 rounded-full bg-[#57068c] flex items-center justify-center">
+                      <span className="text-white text-xs font-bold">
+                        {user.email?.[0].toUpperCase()}
+                      </span>
+                    </div>
+                    <span className="text-xs text-zinc-700 font-semibold">
+                      {netId}@nyu.edu
                     </span>
                   </div>
-                  <span className="text-xs text-zinc-600 font-medium max-w-28 truncate">
-                    {user.email}
-                  </span>
-                </div>
+                </Link>
                 <Button variant="ghost" size="sm" onClick={handleSignOut} className="gap-1.5">
                   <LogOut className="w-3.5 h-3.5" />
                   <span className="hidden sm:block">Sign Out</span>

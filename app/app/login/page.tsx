@@ -65,8 +65,17 @@ export default function LoginPage() {
       }
 
       const supabase = createClient()
-      const { error } = await supabase.auth.signUp({ email, password })
+      const { data, error } = await supabase.auth.signUp({ email, password })
       if (error) throw error
+
+      // Propagate into public.user immediately (trigger handles it too, but this ensures it)
+      const netId = email.split("@")[0]
+      if (data.user) {
+        await supabase.from("user").upsert(
+          { net_id: netId, first_name: "", last_name: "", phone_number: "" },
+          { onConflict: "net_id", ignoreDuplicates: true }
+        )
+      }
 
       setSuccess("Account created! Check your email to confirm, then sign in.")
       setTab("signin")

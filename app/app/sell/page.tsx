@@ -10,9 +10,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
 import { createClient } from "@/utils/supabase/client"
+import Link from "next/link"
 import {
   Plus, MapPin, Clock, Tag, CheckCircle2, Circle,
-  PackageCheck, Loader2, AlertCircle, ChevronDown, ChevronUp
+  PackageCheck, Loader2, AlertCircle, ChevronDown, ChevronUp, Bell
 } from "lucide-react"
 
 interface Listing {
@@ -145,8 +146,47 @@ export default function SellPage() {
   const activeListing = listings.filter((l) => l.is_active)
   const inactiveListing = listings.filter((l) => !l.is_active)
 
+  const { data: pendingOrderCount = 0 } = useQuery({
+    queryKey: ["sell-pending-count", userId],
+    queryFn: async () => {
+      if (!userId) return 0
+      const supabase = createClient()
+      const { data: myListings } = await supabase.from("listing").select("listing_id").eq("seller_net_id", userId)
+      if (!myListings || myListings.length === 0) return 0
+      const ids = myListings.map((l: any) => l.listing_id)
+      const { data: st } = await supabase.from("status").select("status_id").eq("status_name", "Pending").single()
+      if (!st) return 0
+      const { count } = await supabase
+        .from("transaction")
+        .select("transaction_id", { count: "exact", head: true })
+        .in("listing_id", ids)
+        .eq("status_id", (st as any).status_id)
+      return count ?? 0
+    },
+    enabled: !!userId,
+  })
+
   return (
     <div className="min-h-screen bg-zinc-50">
+      {/* Pending orders banner */}
+      {pendingOrderCount > 0 && (
+        <div className="bg-amber-50 border-b border-amber-200">
+          <div className="max-w-5xl mx-auto px-6 py-3 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2 text-amber-800">
+              <Bell className="w-4 h-4" />
+              <span className="text-sm font-semibold">
+                {pendingOrderCount} new buy request{pendingOrderCount !== 1 ? "s" : ""} waiting for your response
+              </span>
+            </div>
+            <Link href="/profile?tab=sales">
+              <Button size="sm" variant="outline" className="border-amber-300 text-amber-800 hover:bg-amber-100 text-xs h-7">
+                View Requests →
+              </Button>
+            </Link>
+          </div>
+        </div>
+      )}
+
       {/* Page header */}
       <div className="bg-white border-b border-zinc-200">
         <div className="max-w-5xl mx-auto px-6 py-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
