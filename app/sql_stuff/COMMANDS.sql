@@ -132,6 +132,142 @@ ORDER BY t.transaction_time DESC;
 
 SELECT email_domain FROM domain;
 
+INSERT INTO domain (email_domain) VALUES
+('nyu.edu'),
+('illinois.edu'),
+('umich.edu'),
+('columbia.edu'),
+('cornell.edu');
+
+INSERT INTO "user" (net_id, first_name, last_name, phone_number) VALUES
+('jd1234', 'John', 'Doe', '2125550101'),
+('as5678', 'Alice', 'Smith', '2125550102'),
+('mb9012', 'Mike', 'Brown', '2125550103'),
+('el3456', 'Emma', 'Lee', '2125550104'),
+('rk7890', 'Ryan', 'Kim', '2125550105');
+
+INSERT INTO location (location) VALUES
+('Third North Dining Hall'),
+('Weinstein Dining Hall'),
+('Lipton Dining Hall'),
+('Palladium Dining Hall'),
+('Brittany Dining Hall');
+
+INSERT INTO urgency (urgency) VALUES
+('Urgent'),
+('High'),
+('Medium'),
+('Low'),
+('No Rush');
+
+INSERT INTO type (type, semester_valid) VALUES
+('Guest Meal', 'Spring 2026'),
+('Dining Dollar', 'Spring 2026'),
+('Meal Swipe', 'Spring 2026'),
+('Weekly Swipe', 'Spring 2026');
+
+INSERT INTO discount (discount_rate) VALUES
+(0.0000),
+(0.1000),
+(0.2000),
+(0.1500);
+
+INSERT INTO status (status_name) VALUES
+('Pending'),
+('Confirmed'),
+('Completed'),
+('Cancelled');
+
+INSERT INTO listing (seller_net_id, preferred_location_id, urgency_id, type_id, discount_id, amount, price, is_active, posted_date, expiration_date)
+VALUES (
+    'jd1234',
+    (SELECT location_id FROM location WHERE location = 'Third North Dining Hall'),
+    (SELECT urgency_id FROM urgency WHERE urgency = 'Medium'),
+    (SELECT type_id FROM type WHERE type = 'Meal Swipe'),
+    (SELECT discount_id FROM discount WHERE discount_rate = 0.0000),
+    '3', 5.00, TRUE, '2026-04-01 10:00:00+00', '2026-05-01 10:00:00+00'
+);
+
+INSERT INTO listing (seller_net_id, preferred_location_id, urgency_id, type_id, discount_id, amount, price, is_active, posted_date, expiration_date)
+VALUES (
+    'as5678',
+    (SELECT location_id FROM location WHERE location = 'Weinstein Dining Hall'),
+    (SELECT urgency_id FROM urgency WHERE urgency = 'Urgent'),
+    (SELECT type_id FROM type WHERE type = 'Guest Meal'),
+    (SELECT discount_id FROM discount WHERE discount_rate = 0.1000),
+    '1', 4.00, TRUE, '2026-04-02 11:00:00+00', '2026-05-02 11:00:00+00'
+);
+
+INSERT INTO listing (seller_net_id, preferred_location_id, urgency_id, type_id, discount_id, amount, price, is_active, posted_date, expiration_date)
+VALUES (
+    'mb9012',
+    (SELECT location_id FROM location WHERE location = 'Lipton Dining Hall'),
+    (SELECT urgency_id FROM urgency WHERE urgency = 'No Rush'),
+    (SELECT type_id FROM type WHERE type = 'Dining Dollar'),
+    (SELECT discount_id FROM discount WHERE discount_rate = 0.2000),
+    '5', 6.50, TRUE, '2026-04-03 09:00:00+00', '2026-05-03 09:00:00+00'
+);
+
+INSERT INTO listing (seller_net_id, preferred_location_id, urgency_id, type_id, discount_id, amount, price, is_active, posted_date, expiration_date)
+VALUES (
+    'el3456',
+    (SELECT location_id FROM location WHERE location = 'Palladium Dining Hall'),
+    (SELECT urgency_id FROM urgency WHERE urgency = 'High'),
+    (SELECT type_id FROM type WHERE type = 'Weekly Swipe'),
+    (SELECT discount_id FROM discount WHERE discount_rate = 0.1500),
+    '2', 4.50, TRUE, '2026-04-04 14:00:00+00', '2026-05-04 14:00:00+00'
+);
+
+INSERT INTO listing (seller_net_id, preferred_location_id, urgency_id, type_id, discount_id, amount, price, is_active, posted_date, expiration_date)
+VALUES (
+    'rk7890',
+    (SELECT location_id FROM location WHERE location = 'Brittany Dining Hall'),
+    (SELECT urgency_id FROM urgency WHERE urgency = 'Low'),
+    (SELECT type_id FROM type WHERE type = 'Meal Swipe'),
+    (SELECT discount_id FROM discount WHERE discount_rate = 0.0000),
+    '4', 5.50, FALSE, '2026-03-20 08:00:00+00', '2026-04-20 08:00:00+00'
+);
+
+INSERT INTO transaction (buyer_id, listing_id, status_id, buyer_confirm, seller_confirm, transaction_time)
+VALUES (
+    'as5678',
+    (SELECT listing_id FROM listing WHERE seller_net_id = 'jd1234' LIMIT 1),
+    (SELECT status_id FROM status WHERE status_name = 'Confirmed'),
+    TRUE, TRUE, '2026-04-05 12:00:00+00'
+);
+
+INSERT INTO transaction (buyer_id, listing_id, status_id, buyer_confirm, seller_confirm, transaction_time)
+VALUES (
+    'rk7890',
+    (SELECT listing_id FROM listing WHERE seller_net_id = 'as5678' LIMIT 1),
+    (SELECT status_id FROM status WHERE status_name = 'Pending'),
+    FALSE, FALSE, '2026-04-06 13:00:00+00'
+);
+
+INSERT INTO transaction (buyer_id, listing_id, status_id, buyer_confirm, seller_confirm, transaction_time)
+VALUES (
+    'jd1234',
+    (SELECT listing_id FROM listing WHERE seller_net_id = 'mb9012' LIMIT 1),
+    (SELECT status_id FROM status WHERE status_name = 'Completed'),
+    TRUE, TRUE, '2026-04-07 15:00:00+00'
+);
+
+INSERT INTO transaction (buyer_id, listing_id, status_id, buyer_confirm, seller_confirm, transaction_time)
+VALUES (
+    'mb9012',
+    (SELECT listing_id FROM listing WHERE seller_net_id = 'el3456' LIMIT 1),
+    (SELECT status_id FROM status WHERE status_name = 'Cancelled'),
+    FALSE, FALSE, '2026-04-08 10:00:00+00'
+);
+
+INSERT INTO transaction (buyer_id, listing_id, status_id, buyer_confirm, seller_confirm, transaction_time)
+VALUES (
+    'el3456',
+    (SELECT listing_id FROM listing WHERE seller_net_id = 'jd1234' LIMIT 1),
+    (SELECT status_id FROM status WHERE status_name = 'Pending'),
+    FALSE, FALSE, '2026-04-09 16:00:00+00'
+);
+
 INSERT INTO listing (seller_net_id, preferred_location_id, urgency_id, type_id, amount, price, is_active, posted_date, expiration_date)
 VALUES ('seller_net_id', 'location_uuid', 'urgency_uuid', 'type_uuid', '3', 5.00, TRUE, NOW(), NOW() + INTERVAL '30 days');
 
