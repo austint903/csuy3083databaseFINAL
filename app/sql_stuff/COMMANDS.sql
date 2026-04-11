@@ -3,17 +3,17 @@
 -- =============================================
 
 CREATE TABLE IF NOT EXISTS school (
-    school_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    school_id   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     school_name TEXT
 );
 
 CREATE TABLE IF NOT EXISTS "user" (
-    net_id TEXT PRIMARY KEY,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    first_name TEXT NOT NULL DEFAULT '',
-    last_name TEXT NOT NULL DEFAULT '',
-    phone_number TEXT NOT NULL DEFAULT '',
-    school_id UUID REFERENCES school(school_id)
+    net_id       TEXT        PRIMARY KEY,
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    first_name   TEXT        NOT NULL DEFAULT '',
+    last_name    TEXT        NOT NULL,
+    phone_number TEXT        NOT NULL,
+    school_id    UUID        REFERENCES school(school_id)
 );
 
 CREATE TABLE IF NOT EXISTS domain (
@@ -22,60 +22,60 @@ CREATE TABLE IF NOT EXISTS domain (
 
 CREATE TABLE IF NOT EXISTS location (
     location_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    location TEXT NOT NULL
+    location    TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS urgency (
     urgency_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    urgency TEXT NOT NULL
+    urgency    TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS type (
-    type_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    type TEXT NOT NULL,
-    semester_valid TEXT
+    type_id        UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    type           TEXT NOT NULL,
+    semester_valid TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS discount (
-    discount_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    discount_rate REAL NOT NULL DEFAULT 0,
-    begin_date TIMESTAMPTZ,
-    end_date TIMESTAMPTZ
+    discount_id   UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    discount_rate REAL        NOT NULL,
+    begin_date    TIMESTAMPTZ NOT NULL,
+    end_date      TIMESTAMPTZ NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS status (
-    status_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    status_name TEXT NOT NULL UNIQUE
+    status_id   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    status_name TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS listing (
-    listing_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    seller_net_id TEXT NOT NULL REFERENCES "user"(net_id),
-    preferred_location_id UUID NOT NULL DEFAULT gen_random_uuid() REFERENCES location(location_id),
-    urgency_id UUID REFERENCES urgency(urgency_id),
-    type_id UUID REFERENCES type(type_id),
-    discount_id UUID REFERENCES discount(discount_id),
-    amount TEXT NOT NULL,
-    price REAL NOT NULL,
-    is_active BOOLEAN NOT NULL DEFAULT TRUE,
-    posted_date TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    expiration_date TIMESTAMPTZ NOT NULL DEFAULT (NOW() + INTERVAL '30 days')
+    listing_id            UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    seller_net_id         TEXT        NOT NULL REFERENCES "user"(net_id),
+    preferred_location_id UUID        NOT NULL DEFAULT gen_random_uuid() REFERENCES location(location_id),
+    urgency_id            UUID        REFERENCES urgency(urgency_id),
+    type_id               UUID        REFERENCES type(type_id),
+    discount_id           UUID        REFERENCES discount(discount_id),
+    amount                TEXT        NOT NULL,
+    price                 REAL        NOT NULL,
+    is_active             BOOLEAN     NOT NULL,
+    posted_date           TIMESTAMPTZ NOT NULL,
+    expiration_date       TIMESTAMPTZ NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS transaction (
-    transaction_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    buyer_id TEXT REFERENCES "user"(net_id),
-    listing_id UUID REFERENCES listing(listing_id),
-    status_id UUID REFERENCES status(status_id),
-    buyer_confirm BOOLEAN DEFAULT FALSE,
-    seller_confirm BOOLEAN DEFAULT FALSE,
+    transaction_id   UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    buyer_id         TEXT        REFERENCES "user"(net_id),
+    listing_id       UUID        REFERENCES listing(listing_id),
+    status_id        UUID        REFERENCES status(status_id),
+    buyer_confirm    BOOLEAN,
+    seller_confirm   BOOLEAN,
     transaction_time TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS comment (
-    comment_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    rating REAL,
-    comment TEXT,
+    comment_id     UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    rating         REAL NOT NULL,
+    comment        TEXT NOT NULL,
     transaction_id UUID REFERENCES transaction(transaction_id)
 );
 
