@@ -1,6 +1,4 @@
--- =============================================
--- TABLE DEFINITIONS
--- =============================================
+-- table definitions
 
 CREATE TABLE IF NOT EXISTS school (
     school_id   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -79,28 +77,11 @@ CREATE TABLE IF NOT EXISTS comment (
     transaction_id UUID REFERENCES transaction(transaction_id)
 );
 
--- =============================================
--- VIEWS
--- =============================================
-
-CREATE OR REPLACE VIEW active_listings_with_details AS
-SELECT l.listing_id, l.price, l.amount, l.posted_date, l.expiration_date, l.seller_net_id,
-    loc.location, u.urgency, d.discount_rate, t.type, t.semester_valid
-FROM listing l
-LEFT JOIN location loc ON l.preferred_location_id = loc.location_id
-LEFT JOIN urgency u ON l.urgency_id = u.urgency_id
-LEFT JOIN discount d ON l.discount_id = d.discount_id
-LEFT JOIN type t ON l.type_id = t.type_id
-WHERE l.is_active = TRUE;
-
--- =============================================
--- FUNCTIONS & TRIGGERS (PL/pgSQL)
--- =============================================
+-- functions and triggers
 
 CREATE OR REPLACE FUNCTION ensure_current_user_row()
 RETURNS VOID
 LANGUAGE plpgsql
-SECURITY DEFINER
 AS $$
 DECLARE
     v_net_id TEXT;
@@ -115,7 +96,6 @@ $$;
 CREATE OR REPLACE FUNCTION auto_create_user_on_signup()
 RETURNS TRIGGER
 LANGUAGE plpgsql
-SECURITY DEFINER
 AS $$
 DECLARE
     v_net_id TEXT;
@@ -149,7 +129,6 @@ $$;
 CREATE OR REPLACE FUNCTION get_user_avg_rating(p_net_id TEXT)
 RETURNS NUMERIC
 LANGUAGE plpgsql
-SECURITY DEFINER
 AS $$
 DECLARE
     v_avg_rating NUMERIC;
@@ -163,9 +142,7 @@ BEGIN
 END;
 $$;
 
--- =============================================
--- STORED PROCEDURES (PL/pgSQL)
--- =============================================
+-- procedures
 
 CREATE OR REPLACE PROCEDURE complete_transaction(p_transaction_id UUID)
 LANGUAGE plpgsql
@@ -198,11 +175,9 @@ BEGIN
 END;
 $$;
 
--- =============================================
--- SELECT QUERIES (used in app)
--- =============================================
+-- select queries
 
--- Get all active listings with details
+-- curr active listings
 SELECT l.listing_id, l.price, l.amount, l.is_active, l.posted_date, l.expiration_date, l.seller_net_id,
     loc.location, u.urgency, d.discount_rate, t.type, t.semester_valid
 FROM listing l
@@ -213,16 +188,16 @@ LEFT JOIN type t ON l.type_id = t.type_id
 WHERE l.is_active = TRUE
 ORDER BY l.posted_date DESC;
 
--- Get transactions for a buyer (with status)
+-- buyer transacs
 SELECT t.listing_id, s.status_name
 FROM transaction t
 JOIN status s ON t.status_id = s.status_id
 WHERE t.buyer_id = 'buyer_net_id';
 
--- Get all statuses
+-- statuses
 SELECT status_id, status_name FROM status;
 
--- Get listings for a specific seller
+-- seller listings
 SELECT l.listing_id, l.price, l.amount, l.is_active, l.posted_date, l.expiration_date, l.seller_net_id,
     loc.location_id, loc.location, u.urgency_id, u.urgency, t.type_id, t.type
 FROM listing l
@@ -232,12 +207,12 @@ LEFT JOIN type t ON l.type_id = t.type_id
 WHERE l.seller_net_id = 'seller_net_id'
 ORDER BY l.posted_date DESC;
 
--- Get reference data dropdowns
+-- dropdown data
 SELECT location_id, location FROM location;
 SELECT urgency_id, urgency FROM urgency;
 SELECT type_id, type FROM type;
 
--- Count pending transactions for a seller
+-- seller pending count
 SELECT COUNT(t.transaction_id)
 FROM transaction t
 WHERE t.listing_id IN (
@@ -245,7 +220,7 @@ WHERE t.listing_id IN (
 )
 AND t.status_id = (SELECT status_id FROM status WHERE status_name = 'Pending');
 
--- Get active listings for a seller (for transaction creation)
+-- seller active listings
 SELECT l.listing_id, l.price, l.amount, l.is_active, l.seller_net_id, l.preferred_location_id,
     l.urgency_id, l.type_id, loc.location_id, loc.location, u.urgency_id, u.urgency, t.type_id, t.type
 FROM listing l
@@ -255,7 +230,7 @@ LEFT JOIN type t ON l.type_id = t.type_id
 WHERE l.seller_net_id = 'seller_net_id' AND l.is_active = TRUE
 ORDER BY l.price ASC;
 
--- Get buyer's transaction history with full details
+-- buyer history
 SELECT t.transaction_id, t.buyer_id, t.listing_id, t.buyer_confirm, t.seller_confirm, t.transaction_time,
     s.status_id, s.status_name, l.price, l.amount, l.seller_net_id, loc.location, ty.type
 FROM transaction t
@@ -266,7 +241,7 @@ LEFT JOIN type ty ON l.type_id = ty.type_id
 WHERE t.buyer_id = 'buyer_net_id'
 ORDER BY t.transaction_time DESC;
 
--- Get seller's incoming transactions with buyer info
+-- seller transactions
 SELECT t.transaction_id, t.buyer_id, t.listing_id, t.buyer_confirm, t.seller_confirm, t.transaction_time,
     s.status_id, s.status_name, l.price, l.amount, l.seller_net_id, loc.location, ty.type,
     u.net_id, u.first_name, u.last_name
@@ -281,24 +256,104 @@ WHERE t.listing_id IN (
 )
 ORDER BY t.transaction_time DESC;
 
--- Get all allowed email domains
+-- domains (email)
 SELECT email_domain FROM domain;
 
--- Get comments/ratings for a transaction
+-- comments on transacs
 SELECT c.comment_id, c.rating, c.comment, c.transaction_id
 FROM comment c
-WHERE c.transaction_id = 'transaction_uuid';
+WHERE c.transaction_id = '39463cc4-a857-456e-a274-acdec819b7eb';
 
--- Get average seller rating
+-- avg rating
 SELECT AVG(c.rating) AS avg_rating
 FROM comment c
 JOIN transaction t ON c.transaction_id = t.transaction_id
 JOIN listing l ON t.listing_id = l.listing_id
 WHERE l.seller_net_id = 'seller_net_id';
 
--- =============================================
--- INSERT SAMPLE DATA
--- =============================================
+
+
+--select statuements to get table schemas + row count
+SELECT column_name, data_type, is_nullable, column_default,
+(SELECT n_live_tup FROM pg_stat_user_tables WHERE relname = 'school') AS row_count
+FROM information_schema.columns
+WHERE table_schema = 'public' AND table_name = 'school'
+ORDER BY ordinal_position;
+
+SELECT column_name, data_type, is_nullable, column_default,
+(SELECT n_live_tup FROM pg_stat_user_tables WHERE relname = 'user') AS row_count
+FROM information_schema.columns
+WHERE table_schema = 'public' AND table_name = 'user'
+ORDER BY ordinal_position;
+
+SELECT column_name, data_type, is_nullable, column_default,
+(SELECT n_live_tup FROM pg_stat_user_tables WHERE relname = 'domain') AS row_count
+FROM information_schema.columns
+WHERE table_schema = 'public' AND table_name = 'domain'
+ORDER BY ordinal_position;
+
+SELECT column_name, data_type, is_nullable, column_default,
+(SELECT n_live_tup FROM pg_stat_user_tables WHERE relname = 'listing') AS row_count
+FROM information_schema.columns
+WHERE table_schema = 'public' AND table_name = 'listing'
+ORDER BY ordinal_position;
+
+SELECT column_name, data_type, is_nullable, column_default,
+(SELECT n_live_tup FROM pg_stat_user_tables WHERE relname = 'transaction') AS row_count
+FROM information_schema.columns
+WHERE table_schema = 'public' AND table_name = 'transaction'
+ORDER BY ordinal_position;
+
+SELECT column_name, data_type, is_nullable, column_default,
+(SELECT n_live_tup FROM pg_stat_user_tables WHERE relname = 'type') AS row_count
+FROM information_schema.columns
+WHERE table_schema = 'public' AND table_name = 'type'
+ORDER BY ordinal_position;
+
+SELECT column_name, data_type, is_nullable, column_default,
+(SELECT n_live_tup FROM pg_stat_user_tables WHERE relname = 'urgency') AS row_count
+FROM information_schema.columns
+WHERE table_schema = 'public' AND table_name = 'urgency'
+ORDER BY ordinal_position;
+
+SELECT column_name, data_type, is_nullable, column_default,
+(SELECT n_live_tup FROM pg_stat_user_tables WHERE relname = 'discount') AS row_count
+FROM information_schema.columns
+WHERE table_schema = 'public' AND table_name = 'discount'
+ORDER BY ordinal_position;
+
+SELECT column_name, data_type, is_nullable, column_default,
+(SELECT n_live_tup FROM pg_stat_user_tables WHERE relname = 'location') AS row_count
+FROM information_schema.columns
+WHERE table_schema = 'public' AND table_name = 'location'
+ORDER BY ordinal_position;
+
+SELECT column_name, data_type, is_nullable, column_default,
+(SELECT n_live_tup FROM pg_stat_user_tables WHERE relname = 'comment') AS row_count
+FROM information_schema.columns
+WHERE table_schema = 'public' AND table_name = 'comment'
+ORDER BY ordinal_position;
+
+SELECT column_name, data_type, is_nullable, column_default,
+(SELECT n_live_tup FROM pg_stat_user_tables WHERE relname = 'status') AS row_count
+FROM information_schema.columns
+WHERE table_schema = 'public' AND table_name = 'status'
+ORDER BY ordinal_position;
+
+-- select row count from tables
+SELECT COUNT(*) FROM public.school;
+SELECT COUNT(*) FROM public."user";
+SELECT COUNT(*) FROM public.domain;
+SELECT COUNT(*) FROM public.location;
+SELECT COUNT(*) FROM public.urgency;
+SELECT COUNT(*) FROM public.type;
+SELECT COUNT(*) FROM public.discount;
+SELECT COUNT(*) FROM public.status;
+SELECT COUNT(*) FROM public.listing;
+SELECT COUNT(*) FROM public.transaction;
+SELECT COUNT(*) FROM public.comment;
+
+-- sample data
 
 INSERT INTO school (school_id, school_name) VALUES
 (gen_random_uuid(), 'New York University'),
@@ -483,125 +538,98 @@ INSERT INTO transaction (buyer_id, listing_id, status_id, buyer_confirm, seller_
 ('at6426', (SELECT listing_id FROM listing WHERE seller_net_id = 'al9012' AND posted_date = '2026-04-09 09:15:00+00'), (SELECT status_id FROM status WHERE status_name = 'Pending'),   FALSE, FALSE, '2026-04-11 02:09:12+00');
 
 INSERT INTO comment (rating, comment, transaction_id) VALUES
--- Transaction: al9012 bought from lv9753 (Completed, 2026-04-05 15:30)
 (4.0, 'Solid transaction. Met at the right spot, no drama. Would use SwipeMarket again for sure.',       (SELECT transaction_id FROM transaction WHERE buyer_id = 'al9012' AND transaction_time = '2026-04-05 15:30:00+00')),
 (4.5, 'Super easy swap at Third North, Jake was on time!',                                               (SELECT transaction_id FROM transaction WHERE buyer_id = 'al9012' AND transaction_time = '2026-04-05 15:30:00+00')),
 (5.0, 'lv9753 was amazing, super fast and easy swap at Third North. Buffet was still open too!',         (SELECT transaction_id FROM transaction WHERE buyer_id = 'al9012' AND transaction_time = '2026-04-05 15:30:00+00')),
--- Transaction: ms5678 bought from xw4415 (Completed, 2026-04-05 18:00)
 (4.0, 'Quick and easy. Buffet entry swipe at Weinstein, no fuss. Will buy again.',                      (SELECT transaction_id FROM transaction WHERE buyer_id = 'ms5678' AND transaction_time = '2026-04-05 18:00:00+00')),
 (5.0, 'xw4415 is the best seller on here. Super chill, met me at Kimmel, whole thing took 2 minutes.',  (SELECT transaction_id FROM transaction WHERE buyer_id = 'ms5678' AND transaction_time = '2026-04-05 18:00:00+00')),
 (4.5, 'Xw4415 was a bit late to Kimmel but overall smooth swap, no issues.',                             (SELECT transaction_id FROM transaction WHERE buyer_id = 'ms5678' AND transaction_time = '2026-04-05 18:00:00+00')),
--- Transaction: jk1234 bought from wt7734 (Completed, 2026-04-06 11:00)
 (5.0, 'Wt7734 was super chill, met at Third North right on time. Would def buy again!',                  (SELECT transaction_id FROM transaction WHERE buyer_id = 'jk1234' AND transaction_time = '2026-04-06 11:00:00+00')),
 (2.5, 'Swipe worked but the seller was 15 min late. Communication could be better. Still got my meal.',  (SELECT transaction_id FROM transaction WHERE buyer_id = 'jk1234' AND transaction_time = '2026-04-06 11:00:00+00')),
 (4.5, 'wt7734 was responsive on the app and showed up at Third North exactly when planned.',              (SELECT transaction_id FROM transaction WHERE buyer_id = 'jk1234' AND transaction_time = '2026-04-06 11:00:00+00')),
--- Transaction: dr7890 bought from mb2468 (Completed, 2026-04-06 12:00)
 (5.0, 'mb2468 came through clutch. I was starving and he showed up in like 5 minutes. 10/10',            (SELECT transaction_id FROM transaction WHERE buyer_id = 'dr7890' AND transaction_time = '2026-04-06 12:00:00+00')),
 (5.0, 'Marcus was great, met at Sarge''s exactly when planned.',                                         (SELECT transaction_id FROM transaction WHERE buyer_id = 'dr7890' AND transaction_time = '2026-04-06 12:00:00+00')),
 (4.5, 'Great seller, Sarge''s was a perfect meetup spot. Very professional.',                             (SELECT transaction_id FROM transaction WHERE buyer_id = 'dr7890' AND transaction_time = '2026-04-06 12:00:00+00')),
--- Transaction: lv9753 bought from ej2345 (Completed, 2026-04-07 14:00)
 (5.0, 'Honestly one of the smoothest swaps I''ve done. Buyer confirmed immediately, no issues at all.',  (SELECT transaction_id FROM transaction WHERE buyer_id = 'lv9753' AND transaction_time = '2026-04-07 14:00:00+00')),
 (4.0, 'Good experience at Kimmel, smooth transaction with Emma.',                                         (SELECT transaction_id FROM transaction WHERE buyer_id = 'lv9753' AND transaction_time = '2026-04-07 14:00:00+00')),
 (3.0, 'ej2345 took a while to show at Kimmel but eventually came through. Swipe worked fine.',            (SELECT transaction_id FROM transaction WHERE buyer_id = 'lv9753' AND transaction_time = '2026-04-07 14:00:00+00')),
--- Transaction: al9012 bought from rp4821 (Confirmed, 2026-04-09 14:00)
 (4.0, 'Good experience at Weinstein buffet. Seller was friendly and on time!',                            (SELECT transaction_id FROM transaction WHERE buyer_id = 'al9012' AND transaction_time = '2026-04-09 14:00:00+00')),
 (4.5, 'Really smooth swap at Bobst area. Seller came right away and the swipe worked first try.',         (SELECT transaction_id FROM transaction WHERE buyer_id = 'al9012' AND transaction_time = '2026-04-09 14:00:00+00')),
 (4.0, 'Good vibes. Seller was chill, location was convenient, would recommend this app.',                 (SELECT transaction_id FROM transaction WHERE buyer_id = 'al9012' AND transaction_time = '2026-04-09 14:00:00+00')),
 (5.0, 'Literally the easiest way to get into Lipton buffet without using your own swipes. 10/10.',        (SELECT transaction_id FROM transaction WHERE buyer_id = 'al9012' AND transaction_time = '2026-04-09 14:00:00+00')),
--- Transaction: dr7890 bought from cf8831 (Confirmed, 2026-04-09 15:30)
 (3.5, 'Transaction went ok at Palladium. Took a while to coordinate but got there.',                     (SELECT transaction_id FROM transaction WHERE buyer_id = 'dr7890' AND transaction_time = '2026-04-09 15:30:00+00')),
 (5.0, 'Weinstein buffet for $6.50 is an absolute steal. Seller was super friendly and on time!',          (SELECT transaction_id FROM transaction WHERE buyer_id = 'dr7890' AND transaction_time = '2026-04-09 15:30:00+00')),
 (3.5, 'Decent experience overall. Palladium buffet was worth it. Seller was a little hard to reach.',     (SELECT transaction_id FROM transaction WHERE buyer_id = 'dr7890' AND transaction_time = '2026-04-09 15:30:00+00')),
 (5.0, 'Dr7890 confirmed receipt super fast. Best buyer I''ve had, very responsive.',                      (SELECT transaction_id FROM transaction WHERE buyer_id = 'dr7890' AND transaction_time = '2026-04-09 15:30:00+00'));
 
--- =============================================
--- INSERT TEMPLATE STATEMENTS (used in app)
--- =============================================
 
-INSERT INTO listing (seller_net_id, preferred_location_id, urgency_id, type_id, amount, price, is_active, posted_date, expiration_date)
-VALUES ('seller_net_id', 'location_uuid', 'urgency_uuid', 'type_uuid', '3', 5.00, TRUE, NOW(), NOW() + INTERVAL '30 days');
+-- updates
 
-INSERT INTO transaction (buyer_id, listing_id, status_id, buyer_confirm, seller_confirm)
-VALUES ('buyer_net_id', 'listing_uuid', 'pending_status_uuid', FALSE, FALSE);
-
-INSERT INTO "user" (net_id, first_name, last_name, phone_number)
-VALUES ('new_net_id', '', '', '')
-ON CONFLICT (net_id) DO NOTHING;
-
-INSERT INTO comment (rating, comment, transaction_id)
-VALUES (4.0, 'Transaction went smoothly.', 'transaction_uuid');
-
--- =============================================
--- UPDATE STATEMENTS (used in app)
--- =============================================
-
--- Update listing details
+-- update listing
 UPDATE listing
-SET preferred_location_id = 'new_location_uuid', urgency_id = 'new_urgency_uuid', type_id = 'new_type_uuid', amount = '4', price = 6.00
-WHERE listing_id = 'listing_uuid';
+SET preferred_location_id = '454abf86-4d57-459e-8620-0d1d97d87cba', urgency_id = 'db99b787-956f-4374-ba00-b51332509225', type_id = '4d35363b-9509-42e4-ad20-e98a013919db', amount = '4', price = 6.00
+WHERE listing_id = 'd0892216-ff4f-4ccd-9e34-f25d36af8bb1';
 
--- Deactivate a listing
-UPDATE listing SET is_active = FALSE WHERE listing_id = 'listing_uuid';
+-- turn off listing
+UPDATE listing SET is_active = FALSE WHERE listing_id = 'd0892216-ff4f-4ccd-9e34-f25d36af8bb1';
 
--- Deactivate all expired listings
+-- turn off expired listings
 UPDATE listing SET is_active = FALSE WHERE expiration_date < NOW() AND is_active = TRUE;
 
--- Seller confirms a transaction
+-- seller confirms
 UPDATE transaction
-SET status_id = 'confirmed_status_uuid', seller_confirm = TRUE
-WHERE transaction_id = 'transaction_uuid';
+SET status_id = 'b17906ea-a3e7-491b-9aee-f3e513ac44ff', seller_confirm = TRUE
+WHERE transaction_id = 'bdabd586-9919-4af7-b869-873e4bf808fe';
 
--- Cancel a transaction
-UPDATE transaction SET status_id = 'cancelled_status_uuid' WHERE transaction_id = 'transaction_uuid';
+-- cancel transaction
+UPDATE transaction SET status_id = '04c55596-284f-4aec-985e-91bd509a7219' WHERE transaction_id = 'bdabd586-9919-4af7-b869-873e4bf808fe';
 
--- Complete a transaction (seller side)
+-- complete transaction
 UPDATE transaction
-SET status_id = 'completed_status_uuid', seller_confirm = TRUE
-WHERE transaction_id = 'transaction_uuid';
+SET status_id = '65cfeb33-668c-4593-99de-79aba23a2e3c', seller_confirm = TRUE
+WHERE transaction_id = 'cc17ec98-f51f-43ea-96a0-8284cf4995c6';
 
--- Buyer confirms receipt
-UPDATE transaction SET buyer_confirm = TRUE WHERE transaction_id = 'transaction_uuid';
+-- buyer confirms
+UPDATE transaction SET buyer_confirm = TRUE WHERE transaction_id = 'bdabd586-9919-4af7-b869-873e4bf808fe';
 
--- Update user profile info
+-- update user
 UPDATE "user"
 SET first_name = 'Updated', last_name = 'Name', phone_number = '2125559999'
-WHERE net_id = 'user_net_id';
+WHERE net_id = 'ak7745';
 
--- Assign a school to a user
+-- set school
 UPDATE "user"
 SET school_id = (SELECT school_id FROM school WHERE school_name = 'New York University')
-WHERE net_id = 'user_net_id';
+WHERE net_id = 'ak7745';
 
--- Update discount validity window
+-- update discount dates
 UPDATE discount
 SET begin_date = '2026-05-01 00:00:00+00', end_date = '2026-08-31 23:59:59+00'
-WHERE discount_id = 'discount_uuid';
+WHERE discount_id = 'ecf3ccb2-b9b3-4e81-8368-1af2bc7d4583';
 
--- Update a comment/rating
+-- update review
 UPDATE comment
 SET rating = 5.0, comment = 'Updated review after reflection.'
-WHERE comment_id = 'comment_uuid';
+WHERE comment_id = '1040e915-d1ad-4f62-8978-63e6af4d68f7';
 
--- =============================================
--- DELETE STATEMENTS (used in app)
--- =============================================
+-- deletes
 
--- Delete a listing
-DELETE FROM listing WHERE listing_id = 'listing_uuid';
+-- delete listing
+DELETE FROM listing WHERE listing_id = 'd0892216-ff4f-4ccd-9e34-f25d36af8bb1';
 
--- Delete an inactive listing
-DELETE FROM listing WHERE listing_id = 'listing_uuid' AND is_active = FALSE;
+-- delete inactive listing
+DELETE FROM listing WHERE listing_id = '356adc42-cbd2-4f03-aaaa-fd8ac58d86cc' AND is_active = FALSE;
 
--- Delete a cancelled transaction
+-- delete cancelled transaction
 DELETE FROM transaction
-WHERE transaction_id = 'transaction_uuid'
-AND status_id = (SELECT status_id FROM status WHERE status_name = 'Cancelled');
+WHERE transaction_id = '3f9c904d-45a4-4984-b9b9-4bce883aa085'
+AND status_id = '04c55596-284f-4aec-985e-91bd509a7219';
 
--- Delete a comment
-DELETE FROM comment WHERE comment_id = 'comment_uuid';
+-- delete comment
+DELETE FROM comment WHERE comment_id = '1040e915-d1ad-4f62-8978-63e6af4d68f7';
 
--- Remove a domain from the allowed list
-DELETE FROM domain WHERE email_domain = 'removed.edu';
+-- delete domain
+DELETE FROM domain WHERE email_domain = 'berkeley.edu';
 
--- Remove a user (cascades to listings/transactions if configured)
-DELETE FROM "user" WHERE net_id = 'user_net_id';
+-- delete user
+DELETE FROM "user" WHERE net_id = 'ak7745';
