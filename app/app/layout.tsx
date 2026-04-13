@@ -7,7 +7,7 @@ import { createClient } from "@/utils/supabase/server"
 
 export const metadata: Metadata = {
   title: "Swipe Marketplace",
-  description: "NYU Meal Swipe Peer-to-Peer Marketplace",
+  description: "Campus meal swipe peer-to-peer marketplace",
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
@@ -16,8 +16,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const { data: { user } } = await supabase.auth.getUser()
 
   return (
-    <html lang="en">
-      <body className="bg-zinc-50 min-h-screen">
+    <html lang="en" suppressHydrationWarning>
+      <body className="min-h-screen bg-background text-foreground">
         <Providers>
           <Header user={user} />
           {children}
@@ -26,5 +26,4 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     </html>
   )
 }
-
 

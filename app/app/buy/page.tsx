@@ -177,7 +177,7 @@ export default function BuyPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50">
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
       {/* Buy confirmation modal */}
       <AnimatePresence>
         {buyingListing && (
@@ -193,49 +193,49 @@ export default function BuyPage() {
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.95, opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden"
+              className="w-full max-w-sm overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-zinc-900 dark:ring-1 dark:ring-zinc-800"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="h-1.5 bg-gradient-to-r from-[#57068c] to-[#8b2fc9]" />
               <div className="p-6 flex flex-col gap-4">
                 <div className="flex items-start justify-between">
                   <div>
-                    <h2 className="text-lg font-black text-zinc-900">Confirm Purchase</h2>
-                    <p className="text-xs text-zinc-500 mt-0.5">Request will be sent to the seller</p>
+                    <h2 className="text-lg font-black text-zinc-900 dark:text-white">Confirm Purchase</h2>
+                    <p className="mt-0.5 text-xs font-medium text-zinc-600 dark:text-white">Request will be sent to the seller</p>
                   </div>
                   <button
                     onClick={() => { setBuyingListing(null); setBuyError("") }}
-                    className="text-zinc-400 hover:text-zinc-600 transition-colors"
+                    className="text-zinc-500 transition-colors hover:text-zinc-700 dark:text-white dark:hover:text-white"
                   >
                     <X className="w-5 h-5" />
                   </button>
                 </div>
 
-                <div className="bg-zinc-50 rounded-xl border border-zinc-100 p-4 space-y-2">
+                <div className="space-y-2 rounded-xl border border-zinc-100 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-950/60">
                   <div className="flex justify-between items-baseline">
-                    <span className="text-sm text-zinc-500">Price per swipe</span>
+                    <span className="text-sm font-medium text-zinc-600 dark:text-white">Price per swipe</span>
                     <span className="font-black text-[#57068c] text-xl">${buyingListing.price.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between items-baseline">
-                    <span className="text-sm text-zinc-500">Quantity</span>
-                    <span className="font-semibold text-zinc-800">{buyingListing.amount} swipe{Number(buyingListing.amount) !== 1 ? "s" : ""}</span>
+                    <span className="text-sm font-medium text-zinc-600 dark:text-white">Quantity</span>
+                    <span className="font-bold text-zinc-900 dark:text-white">{buyingListing.amount} swipe{Number(buyingListing.amount) !== 1 ? "s" : ""}</span>
                   </div>
                   {buyingListing.location && (
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-zinc-500">Meet at</span>
-                      <span className="text-sm font-medium text-zinc-700 flex items-center gap-1">
+                      <span className="text-sm font-medium text-zinc-600 dark:text-white">Meet at</span>
+                      <span className="flex items-center gap-1 text-sm font-semibold text-zinc-800 dark:text-white">
                         <MapPin className="w-3 h-3 text-[#57068c]" />
                         {buyingListing.location.location}
                       </span>
                     </div>
                   )}
                   <div className="flex justify-between items-baseline">
-                    <span className="text-sm text-zinc-500">Seller</span>
-                    <span className="text-sm font-medium text-zinc-700">{buyingListing.seller_net_id}@nyu.edu</span>
+                    <span className="text-sm font-medium text-zinc-600 dark:text-white">Seller</span>
+                    <span className="text-sm font-semibold text-zinc-800 dark:text-white">{buyingListing.seller_net_id}@nyu.edu</span>
                   </div>
-                  <div className="border-t border-zinc-200 pt-2 flex justify-between items-baseline">
-                    <span className="text-sm font-semibold text-zinc-700">Total</span>
-                    <span className="font-black text-zinc-900 text-lg">
+                  <div className="flex justify-between items-baseline border-t border-zinc-200 pt-2 dark:border-zinc-800">
+                    <span className="text-sm font-bold text-zinc-800 dark:text-white">Total</span>
+                    <span className="text-lg font-black text-zinc-900 dark:text-white">
                       ${(buyingListing.price * Number(buyingListing.amount)).toFixed(2)}
                     </span>
                   </div>
@@ -266,7 +266,7 @@ export default function BuyPage() {
                     )}
                   </Button>
                 )}
-                <p className="text-[10px] text-zinc-400 text-center">
+                <p className="text-center text-[10px] font-medium text-zinc-500 dark:text-white">
                   You'll coordinate the meetup with the seller after they accept.
                 </p>
               </div>
@@ -276,14 +276,14 @@ export default function BuyPage() {
       </AnimatePresence>
 
       {/* Page header */}
-      <div className="bg-white border-b border-zinc-200">
+      <div className="border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950/90">
         <div className="max-w-7xl mx-auto px-6 py-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-black text-zinc-900 flex items-center gap-2">
+            <h1 className="text-2xl font-black text-zinc-900 flex items-center gap-2 dark:text-white">
               <UtensilsCrossed className="w-6 h-6 text-[#57068c]" />
               Available Swipes
             </h1>
-            <p className="text-zinc-500 text-sm mt-0.5">
+            <p className="mt-0.5 text-sm font-medium text-zinc-600 dark:text-white">
               {isLoading ? "Loading..." : `${filtered.length} listing${filtered.length !== 1 ? "s" : ""} available`}
             </p>
           </div>
@@ -320,11 +320,11 @@ export default function BuyPage() {
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.25 }}
-              className="overflow-hidden border-t border-zinc-100"
+              className="overflow-hidden border-t border-zinc-100 dark:border-zinc-800"
             >
               <div className="max-w-7xl mx-auto px-6 py-4 flex flex-wrap gap-6 items-end">
                 <div className="min-w-56">
-                  <label className="block text-xs font-medium text-zinc-500 mb-2">
+                  <label className="mb-2 block text-xs font-semibold text-zinc-600 dark:text-white">
                     Max Price: <span className="text-[#57068c] font-bold">${priceMax}</span>
                   </label>
                   <Slider
@@ -353,11 +353,11 @@ export default function BuyPage() {
           </div>
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-center">
-            <div className="w-16 h-16 rounded-2xl bg-zinc-100 flex items-center justify-center mb-4">
-              <UtensilsCrossed className="w-8 h-8 text-zinc-400" />
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-900">
+              <UtensilsCrossed className="w-8 h-8 text-zinc-500 dark:text-white" />
             </div>
-            <h3 className="text-lg font-semibold text-zinc-700 mb-1">No listings found</h3>
-            <p className="text-zinc-400 text-sm">Try adjusting your filters or check back later.</p>
+            <h3 className="mb-1 text-lg font-bold text-zinc-800 dark:text-white">No listings found</h3>
+            <p className="text-sm font-medium text-zinc-500 dark:text-white">Try adjusting your filters or check back later.</p>
           </div>
         ) : (
           <motion.div
@@ -370,7 +370,7 @@ export default function BuyPage() {
               const alreadyRequested = pendingIds.has(listing.listing_id) || justBought.has(listing.listing_id)
               return (
                 <motion.div key={listing.listing_id} variants={cardVariants} whileHover={{ y: -3 }}>
-                  <Card className="relative h-full overflow-hidden border-zinc-200 hover:shadow-lg hover:border-[#57068c]/30 transition-all duration-200 group">
+                  <Card className="group relative h-full overflow-hidden border-zinc-200 transition-all duration-200 hover:border-[#57068c]/30 hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-900/80">
                     {listing.discount && listing.discount.discount_rate > 0 && (
                       <div className="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-black px-2.5 py-1 rounded-bl-xl z-10">
                         -{Math.round(listing.discount.discount_rate * 100)}% OFF
@@ -388,22 +388,22 @@ export default function BuyPage() {
                       <div>
                         <div className="flex items-baseline gap-1.5">
                           <span className="text-2xl font-black text-[#57068c]">${listing.price.toFixed(2)}</span>
-                          <span className="text-zinc-400 text-sm">× {listing.amount} swipe{Number(listing.amount) !== 1 ? "s" : ""}</span>
+                          <span className="text-sm font-medium text-zinc-500 dark:text-white">× {listing.amount} swipe{Number(listing.amount) !== 1 ? "s" : ""}</span>
                         </div>
-                        <div className="flex items-center gap-1 text-xs text-zinc-500 mt-0.5">
+                        <div className="mt-0.5 flex items-center gap-1 text-xs font-medium text-zinc-600 dark:text-white">
                           <TrendingDown className="w-3 h-3 text-emerald-500" />
                           <span>${listing.price.toFixed(2)}/ea</span>
                         </div>
                       </div>
 
                       {listing.type && (
-                        <div className="text-xs text-zinc-600 font-medium bg-zinc-50 rounded-lg px-2.5 py-1.5 border border-zinc-100">
+                        <div className="rounded-lg border border-zinc-100 bg-zinc-50 px-2.5 py-1.5 text-xs font-semibold text-zinc-700 dark:border-zinc-800 dark:bg-zinc-950/70 dark:text-white">
                           {listing.type.type}
                         </div>
                       )}
 
                       {listing.location && (
-                        <div className="flex items-start gap-1.5 text-xs text-zinc-500">
+                        <div className="flex items-start gap-1.5 text-xs font-medium text-zinc-600 dark:text-white">
                           <MapPin className="w-3.5 h-3.5 shrink-0 mt-0.5 text-[#57068c]" />
                           <span className="leading-tight">{listing.location.location}</span>
                           {BUFFET_HALLS.has(listing.location.location) && (
@@ -418,19 +418,24 @@ export default function BuyPage() {
                             {listing.urgency.urgency}
                           </Badge>
                         )}
-                        <div className="flex items-center gap-1 text-[10px] text-zinc-400">
+                        <div className="flex items-center gap-1 text-[10px] font-medium text-zinc-500 dark:text-white">
                           <Tag className="w-3 h-3" />
                           <span>{listing.seller_net_id}</span>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-1 text-[10px] text-zinc-400 border-t border-zinc-100 pt-2.5">
+                      <div className="flex items-center gap-1 border-t border-zinc-100 pt-2.5 text-[10px] font-medium text-zinc-500 dark:border-zinc-800 dark:text-white">
                         <Clock className="w-3 h-3" />
                         <span>Expires {new Date(listing.expiration_date).toLocaleDateString()}</span>
                       </div>
 
                       {alreadyRequested ? (
-                        <Button size="sm" variant="outline" className="w-full mt-1 gap-1.5 text-emerald-600 border-emerald-200 bg-emerald-50 cursor-default" disabled>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="mt-1 w-full cursor-default gap-1.5 border-emerald-200 bg-emerald-50 text-emerald-600 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-300"
+                          disabled
+                        >
                           <CheckCircle2 className="w-3.5 h-3.5" />
                           Request Sent
                         </Button>

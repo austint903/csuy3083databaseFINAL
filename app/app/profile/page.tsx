@@ -413,7 +413,7 @@ export default function ProfilePage() {
                                 <div className="flex gap-1.5">
                                   <Button
                                     size="sm"
-                                    className="text-xs h-7 gap-1 bg-emerald-600 hover:bg-emerald-700"
+                                    className="h-7 gap-1 bg-emerald-600 text-white hover:bg-emerald-700 dark:bg-emerald-500 dark:text-emerald-950 dark:hover:bg-emerald-400"
                                     onClick={() => updateStatusMutation.mutate({ transactionId: tx.transaction_id, newStatus: "Confirmed" })}
                                     disabled={isUpdating}
                                   >
@@ -423,7 +423,7 @@ export default function ProfilePage() {
                                   <Button
                                     size="sm"
                                     variant="outline"
-                                    className="text-xs h-7 gap-1 text-red-500 border-red-200 hover:bg-red-50"
+                                    className="h-7 gap-1 border-red-200 text-red-500 hover:bg-red-50 dark:border-red-500/40 dark:text-red-300 dark:hover:bg-red-500/10"
                                     onClick={() => updateStatusMutation.mutate({ transactionId: tx.transaction_id, newStatus: "Cancelled" })}
                                     disabled={isUpdating}
                                   >

@@ -4,18 +4,18 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#57068c] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer",
+  "inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 cursor-pointer",
   {
     variants: {
       variant: {
-        default: "bg-[#57068c] text-white shadow-sm hover:bg-[#40046a] active:scale-[0.98]",
-        outline: "border-2 border-[#57068c] text-[#57068c] bg-transparent hover:bg-[#57068c] hover:text-white active:scale-[0.98]",
-        ghost: "hover:bg-zinc-100 text-zinc-700 active:scale-[0.98]",
-        destructive: "bg-red-500 text-white hover:bg-red-600 active:scale-[0.98]",
-        success: "bg-emerald-600 text-white hover:bg-emerald-700 active:scale-[0.98]",
-        secondary: "bg-zinc-100 text-zinc-900 hover:bg-zinc-200 active:scale-[0.98]",
-        white: "bg-white text-[#57068c] hover:bg-zinc-50 shadow-sm active:scale-[0.98]",
-        muted: "border border-zinc-300 text-zinc-500 hover:bg-zinc-50 hover:text-zinc-700 active:scale-[0.98]",
+        default: "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 active:scale-[0.98]",
+        outline: "border border-border bg-background text-foreground hover:bg-accent hover:text-accent-foreground active:scale-[0.98]",
+        ghost: "text-muted-foreground hover:bg-accent hover:text-accent-foreground active:scale-[0.98]",
+        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90 active:scale-[0.98]",
+        success: "bg-emerald-600 text-white hover:bg-emerald-700 active:scale-[0.98] dark:bg-emerald-500 dark:text-emerald-950 dark:hover:bg-emerald-400",
+        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80 active:scale-[0.98]",
+        white: "!bg-white !text-slate-900 shadow-sm hover:!bg-slate-100 active:scale-[0.98]",
+        muted: "border border-border text-muted-foreground hover:bg-muted hover:text-foreground active:scale-[0.98]",
         glass: "bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 active:scale-[0.98]",
       },
       size: {

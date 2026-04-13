@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { ModeToggle } from "@/components/mode-toggle"
 import { createClient } from "@/utils/supabase/client"
 import {
   ArrowLeft, UtensilsCrossed, Loader2, AlertCircle,
@@ -32,7 +33,7 @@ export default function LoginPage() {
     const { data } = await supabase.from("domain").select("email_domain")
     if (!data) return false
 
-    // Handle both "@nyu.edu" and "nyu.edu" formats in the table
+    // Handle both "@school.edu" and "school.edu" formats in the table
     return data.some((row) => {
       const stored = row.email_domain.replace(/^@/, "")
       return stored === domain
@@ -93,7 +94,10 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#57068c] via-[#40046a] to-[#2a0347] flex flex-col items-center justify-center px-6 relative overflow-hidden">
+    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-slate-950 via-slate-800 to-stone-800 px-6">
+      <div className="absolute right-6 top-6 z-20">
+        <ModeToggle className="text-white hover:bg-white/10 hover:text-white" />
+      </div>
       {/* Grid overlay */}
       <div
         className="absolute inset-0 opacity-[0.06] pointer-events-none"
@@ -103,8 +107,8 @@ export default function LoginPage() {
           backgroundSize: "60px 60px",
         }}
       />
-      <div className="absolute -top-48 -left-48 w-[600px] h-[600px] rounded-full bg-purple-500/15 blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-48 -right-48 w-[600px] h-[600px] rounded-full bg-violet-600/15 blur-3xl pointer-events-none" />
+      <div className="pointer-events-none absolute -left-48 -top-48 h-[600px] w-[600px] rounded-full bg-sky-300/10 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-48 -right-48 h-[600px] w-[600px] rounded-full bg-amber-200/10 blur-3xl" />
 
       <div className="relative z-10 w-full max-w-sm">
         {/* Back */}
@@ -114,7 +118,7 @@ export default function LoginPage() {
           transition={{ duration: 0.3 }}
           className="mb-6"
         >
-          <Link href="/" className="inline-flex items-center gap-1.5 text-purple-300 hover:text-white text-sm transition-colors">
+          <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-slate-300 transition-colors hover:text-white">
             <ArrowLeft className="w-3.5 h-3.5" />
             Back to home
           </Link>
@@ -127,17 +131,17 @@ export default function LoginPage() {
           className="bg-white rounded-2xl shadow-2xl shadow-black/30 overflow-hidden"
         >
           {/* Top accent */}
-          <div className="h-1.5 bg-gradient-to-r from-[#57068c] via-[#8b2fc9] to-[#57068c]" />
+          <div className="h-1.5 bg-gradient-to-r from-slate-700 via-slate-500 to-stone-500" />
 
           <div className="p-7 flex flex-col gap-5">
             {/* Brand */}
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#57068c] flex items-center justify-center shadow-lg shadow-purple-900/30">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary shadow-lg shadow-slate-900/20">
                 <UtensilsCrossed className="w-5 h-5 text-white" />
               </div>
               <div>
                 <h1 className="text-lg font-black text-zinc-900 leading-none">
-                  Swipe<span className="text-[#57068c]">Market</span>
+                  Swipe<span className="text-primary">Market</span>
                 </h1>
                 <p className="text-xs text-zinc-400 mt-0.5">University meal swipe marketplace</p>
               </div>
@@ -186,7 +190,7 @@ export default function LoginPage() {
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 pointer-events-none" />
                   <Input
                     type="email"
-                    placeholder="you@nyu.edu"
+                    placeholder="you@school.edu"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="pl-9"

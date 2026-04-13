@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
+import { ModeToggle } from "@/components/mode-toggle"
 import { createClient } from "@/utils/supabase/client"
 import { ShoppingCart, Tag, LogIn, LogOut, UtensilsCrossed, UserCircle } from "lucide-react"
 import type { User } from "@supabase/supabase-js"
@@ -64,16 +65,16 @@ export function Header({ user }: HeaderProps) {
       initial={{ y: -80, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
-      className="sticky top-0 z-50 w-full border-b border-zinc-200 bg-white/90 backdrop-blur-md"
+      className="sticky top-0 z-50 w-full border-b border-border/80 bg-background/85 backdrop-blur-md"
     >
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-6">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5 shrink-0">
-          <div className="w-8 h-8 rounded-lg bg-[#57068c] flex items-center justify-center">
-            <UtensilsCrossed className="w-4 h-4 text-white" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+            <UtensilsCrossed className="h-4 w-4" />
           </div>
-          <span className="font-bold text-zinc-900 text-base tracking-tight hidden sm:block">
-            Swipe<span className="text-[#57068c]">Market</span>
+          <span className="hidden text-base font-bold tracking-tight text-foreground sm:block">
+            Swipe<span className="text-primary">Market</span>
           </span>
         </Link>
 
@@ -86,8 +87,8 @@ export function Header({ user }: HeaderProps) {
                 <button
                   className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-150 cursor-pointer ${
                     active
-                      ? "bg-[#57068c] text-white shadow-sm"
-                      : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                   }`}
                 >
                   <Icon className="w-3.5 h-3.5" />
@@ -105,6 +106,7 @@ export function Header({ user }: HeaderProps) {
 
         {/* Auth */}
         <div className="flex items-center gap-2 shrink-0">
+          <ModeToggle />
           <AnimatePresence mode="wait">
             {user ? (
               <motion.div
@@ -115,14 +117,14 @@ export function Header({ user }: HeaderProps) {
                 className="flex items-center gap-2"
               >
                 <Link href="/profile">
-                  <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 transition-colors cursor-pointer">
-                    <div className="w-5 h-5 rounded-full bg-[#57068c] flex items-center justify-center">
+                  <div className="hidden cursor-pointer items-center gap-2 rounded-lg bg-secondary px-3 py-1.5 transition-colors hover:bg-secondary/80 sm:flex">
+                    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-primary">
                       <span className="text-white text-xs font-bold">
                         {user.email?.[0].toUpperCase()}
                       </span>
                     </div>
-                    <span className="text-xs text-zinc-700 font-semibold">
-                      {netId}@nyu.edu
+                    <span className="text-xs font-semibold text-foreground/80">
+                      {user.email ?? netId}
                     </span>
                   </div>
                 </Link>

@@ -76,8 +76,8 @@ const rowVariants: Variants = {
 function SectionHeader({ title, count }: { title: string; count: number }) {
   return (
     <div className="flex items-center gap-3 mb-4">
-      <h3 className="font-bold text-zinc-800 text-base">{title}</h3>
-      <span className="text-xs bg-zinc-100 text-zinc-600 rounded-full px-2 py-0.5 font-semibold">{count}</span>
+      <h3 className="text-base font-bold text-zinc-900 dark:text-white">{title}</h3>
+      <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-bold text-zinc-700 dark:bg-zinc-900 dark:text-white">{count}</span>
     </div>
   )
 }
@@ -167,19 +167,23 @@ export default function SellPage() {
   })
 
   return (
-    <div className="min-h-screen bg-zinc-50">
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
       {/* Pending orders banner */}
       {pendingOrderCount > 0 && (
-        <div className="bg-amber-50 border-b border-amber-200">
+        <div className="border-b border-amber-200 bg-amber-50 dark:border-amber-700/30 dark:bg-amber-950/30">
           <div className="max-w-5xl mx-auto px-6 py-3 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-2 text-amber-800">
+            <div className="flex items-center gap-2 text-amber-800 dark:text-amber-200">
               <Bell className="w-4 h-4" />
               <span className="text-sm font-semibold">
                 {pendingOrderCount} new buy request{pendingOrderCount !== 1 ? "s" : ""} waiting for your response
               </span>
             </div>
             <Link href="/profile?tab=sales">
-              <Button size="sm" variant="outline" className="border-amber-300 text-amber-800 hover:bg-amber-100 text-xs h-7">
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-7 border-amber-300 text-xs text-amber-800 hover:bg-amber-100 dark:border-amber-500/40 dark:text-amber-200 dark:hover:bg-amber-500/10"
+              >
                 View Requests →
               </Button>
             </Link>
@@ -188,11 +192,11 @@ export default function SellPage() {
       )}
 
       {/* Page header */}
-      <div className="bg-white border-b border-zinc-200">
+      <div className="border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950/90">
         <div className="max-w-5xl mx-auto px-6 py-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-black text-zinc-900">My Listings</h1>
-            <p className="text-zinc-500 text-sm mt-0.5">
+            <h1 className="text-2xl font-black text-zinc-900 dark:text-white">My Listings</h1>
+            <p className="mt-0.5 text-sm font-medium text-zinc-600 dark:text-white">
               Manage your meal swipe postings
             </p>
           </div>
@@ -212,14 +216,14 @@ export default function SellPage() {
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.25 }}
-              className="overflow-hidden border-t border-zinc-100"
+              className="overflow-hidden border-t border-zinc-100 dark:border-zinc-800"
             >
               <div className="max-w-5xl mx-auto px-6 py-5">
-                <div className="bg-zinc-50 rounded-xl border border-zinc-200 p-5">
-                  <h3 className="font-semibold text-zinc-800 text-sm mb-4">Create New Listing</h3>
+                <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-5 dark:border-zinc-800 dark:bg-zinc-900">
+                  <h3 className="mb-4 text-sm font-bold text-zinc-900 dark:text-white">Create New Listing</h3>
                   <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
                     <div className="col-span-2 sm:col-span-1 lg:col-span-2">
-                      <label className="block text-xs text-zinc-500 mb-1">Location *</label>
+                      <label className="mb-1 block text-xs font-medium text-zinc-600 dark:text-white">Location *</label>
                       <Select value={form.locationId} onValueChange={(v) => setForm({ ...form, locationId: v })}>
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="Select location…" />
@@ -232,7 +236,7 @@ export default function SellPage() {
                       </Select>
                     </div>
                     <div>
-                      <label className="block text-xs text-zinc-500 mb-1">Type</label>
+                      <label className="mb-1 block text-xs font-medium text-zinc-600 dark:text-white">Type</label>
                       <Select value={form.typeId || "__none__"} onValueChange={(v) => setForm({ ...form, typeId: v === "__none__" ? "" : v })}>
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="Any type" />
@@ -246,7 +250,7 @@ export default function SellPage() {
                       </Select>
                     </div>
                     <div>
-                      <label className="block text-xs text-zinc-500 mb-1">Urgency</label>
+                      <label className="mb-1 block text-xs font-medium text-zinc-600 dark:text-white">Urgency</label>
                       <Select value={form.urgencyId || "__none__"} onValueChange={(v) => setForm({ ...form, urgencyId: v === "__none__" ? "" : v })}>
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="None" />
@@ -260,7 +264,7 @@ export default function SellPage() {
                       </Select>
                     </div>
                     <div>
-                      <label className="block text-xs text-zinc-500 mb-1">Qty *</label>
+                      <label className="mb-1 block text-xs font-medium text-zinc-600 dark:text-white">Qty *</label>
                       <Input
                         type="number"
                         placeholder="e.g. 3"
@@ -270,7 +274,7 @@ export default function SellPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs text-zinc-500 mb-1">Price/ea ($) *</label>
+                      <label className="mb-1 block text-xs font-medium text-zinc-600 dark:text-white">Price/ea ($) *</label>
                       <Input
                         type="number"
                         placeholder="e.g. 5"
@@ -282,7 +286,7 @@ export default function SellPage() {
                     </div>
                   </div>
                   {formError && (
-                    <p className="flex items-center gap-1.5 text-red-500 text-xs mt-3">
+                    <p className="mt-3 flex items-center gap-1.5 text-xs font-medium text-red-500">
                       <AlertCircle className="w-3.5 h-3.5" />
                       {formError}
                     </p>
@@ -321,7 +325,7 @@ export default function SellPage() {
             </div>
           ) : activeListing.length === 0 ? (
             <EmptyState
-              icon={<Tag className="w-6 h-6 text-zinc-400" />}
+              icon={<Tag className="w-6 h-6 text-zinc-500 dark:text-white" />}
               message="No active listings. Create one to start selling."
             />
           ) : (
@@ -344,7 +348,7 @@ export default function SellPage() {
             <Skeleton className="h-20 w-full rounded-xl" />
           ) : inactiveListing.length === 0 ? (
             <EmptyState
-              icon={<PackageCheck className="w-6 h-6 text-zinc-400" />}
+              icon={<PackageCheck className="w-6 h-6 text-zinc-500 dark:text-white" />}
               message="Your completed listings will appear here."
             />
           ) : (
@@ -362,9 +366,9 @@ export default function SellPage() {
 
 function EmptyState({ icon, message }: { icon: React.ReactNode; message: string }) {
   return (
-    <div className="flex flex-col items-center justify-center py-12 rounded-xl border border-dashed border-zinc-300 text-center gap-2">
+    <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-zinc-300 py-12 text-center dark:border-zinc-800 dark:bg-zinc-900/40">
       {icon}
-      <p className="text-zinc-500 text-sm">{message}</p>
+      <p className="text-sm font-medium text-zinc-600 dark:text-white">{message}</p>
     </div>
   )
 }
@@ -385,26 +389,26 @@ function ListingRow({
       animate="show"
       whileHover={inactive ? {} : { x: 3 }}
     >
-      <Card className={`border-zinc-200 overflow-hidden ${inactive ? "bg-zinc-50" : "hover:shadow-md transition-shadow duration-200"}`}>
+      <Card className={`overflow-hidden border-zinc-200 dark:border-zinc-800 ${inactive ? "bg-zinc-50 dark:bg-zinc-900/70" : "transition-shadow duration-200 hover:shadow-md dark:bg-zinc-900/80"}`}>
         <div className={`h-1 ${inactive ? "bg-zinc-300" : "bg-[#57068c]"}`} />
         <CardContent className="p-4">
           <div className="flex items-center gap-4 flex-wrap">
             {/* Price */}
             <div className="min-w-[80px]">
-              <p className="text-[10px] uppercase text-zinc-400 tracking-wider mb-0.5">Price</p>
+              <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-white">Price</p>
               <p className="font-black text-[#57068c] text-lg">${listing.price.toFixed(2)}</p>
             </div>
 
             {/* Amount */}
             <div className="min-w-[70px]">
-              <p className="text-[10px] uppercase text-zinc-400 tracking-wider mb-0.5">Swipes</p>
-              <p className="font-bold text-zinc-800">{listing.amount}</p>
+              <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-white">Swipes</p>
+              <p className="font-bold text-zinc-900 dark:text-white">{listing.amount}</p>
             </div>
 
             {/* Location */}
             <div className="flex-1 min-w-[150px]">
-              <p className="text-[10px] uppercase text-zinc-400 tracking-wider mb-0.5">Location</p>
-              <div className="flex items-center gap-1 text-sm font-medium text-zinc-700">
+              <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-white">Location</p>
+              <div className="flex items-center gap-1 text-sm font-semibold text-zinc-800 dark:text-white">
                 <MapPin className="w-3.5 h-3.5 text-[#57068c]" />
                 {listing.location?.location ?? "—"}
               </div>
@@ -413,15 +417,15 @@ function ListingRow({
             {/* Type */}
             {listing.type && (
               <div className="min-w-[120px]">
-                <p className="text-[10px] uppercase text-zinc-400 tracking-wider mb-0.5">Type</p>
-                <p className="text-xs text-zinc-600">{listing.type.type}</p>
+                <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-white">Type</p>
+                <p className="text-xs font-medium text-zinc-700 dark:text-white">{listing.type.type}</p>
               </div>
             )}
 
             {/* Urgency */}
             {listing.urgency && (
               <div>
-                <p className="text-[10px] uppercase text-zinc-400 tracking-wider mb-0.5">Urgency</p>
+                <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-white">Urgency</p>
                 <Badge
                   variant={
                     listing.urgency.urgency === "Urgent" ? "urgent" :
@@ -438,8 +442,8 @@ function ListingRow({
 
             {/* Date */}
             <div className="min-w-[100px]">
-              <p className="text-[10px] uppercase text-zinc-400 tracking-wider mb-0.5">Posted</p>
-              <div className="flex items-center gap-1 text-xs text-zinc-500">
+              <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-white">Posted</p>
+              <div className="flex items-center gap-1 text-xs font-medium text-zinc-600 dark:text-white">
                 <Clock className="w-3 h-3" />
                 {new Date(listing.posted_date).toLocaleDateString()}
               </div>
@@ -459,7 +463,12 @@ function ListingRow({
                     Active
                   </Badge>
                   {onDeactivate && (
-                    <Button variant="ghost" size="sm" className="text-zinc-400 hover:text-red-500 text-xs h-7" onClick={onDeactivate}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 text-xs font-medium text-zinc-500 hover:text-red-500 dark:text-white dark:hover:bg-red-500/10 dark:hover:text-red-300"
+                      onClick={onDeactivate}
+                    >
                       Deactivate
                     </Button>
                   )}

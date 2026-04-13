@@ -230,7 +230,7 @@ export default function ModifyPage() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 text-zinc-400 hover:text-red-500 hover:bg-red-50"
+                          className="h-8 w-8 text-zinc-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10 dark:hover:text-red-300"
                           onClick={() => deleteMutation.mutate(listing.listing_id)}
                           disabled={isDeleting}
                         >
