@@ -98,6 +98,7 @@ export default function BuyPage() {
   const queryClient = useQueryClient()
   const router = useRouter()
   const [priceMax, setPriceMax] = useState(20)
+  const [pendingPriceMax, setPendingPriceMax] = useState(20)
   const [sortBy, setSortBy] = useState<SortOption>("newest")
   const [showFilters, setShowFilters] = useState(false)
   const [userId, setUserId] = useState<string | null>(null)
@@ -322,18 +323,20 @@ export default function BuyPage() {
               <div className="max-w-7xl mx-auto px-6 py-4 flex flex-wrap gap-6 items-end">
                 <div className="min-w-56">
                   <label className="mb-2 block text-xs font-medium text-muted-foreground">
-                    Max Price: <span className="text-brand font-semibold">${priceMax}</span>
+                    Max Price: <span className="text-brand font-semibold">${pendingPriceMax}</span>{pendingPriceMax !== priceMax && <span className="text-muted-foreground"> (applied: ${priceMax})</span>}
                   </label>
                   <Slider
-                    value={priceMax}
+                    value={pendingPriceMax}
                     min={1}
                     max={20}
                     step={0.5}
-                    onChange={(e) => setPriceMax(Number(e.target.value))}
+                    onChange={(e) => setPendingPriceMax(Number(e.target.value))}
+                    onKeyDown={(e) => { if (e.key === "Enter") setPriceMax(pendingPriceMax) }}
                     className="w-full"
                   />
+                  <p className="mt-1 text-xs text-muted-foreground">Press Enter to apply</p>
                 </div>
-                <Button variant="outline" size="sm" onClick={() => setPriceMax(20)}>
+                <Button variant="outline" size="sm" onClick={() => { setPriceMax(20); setPendingPriceMax(20) }}>
                   Reset
                 </Button>
               </div>
