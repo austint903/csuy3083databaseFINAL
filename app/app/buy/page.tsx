@@ -13,7 +13,7 @@ import { createClient } from "@/utils/supabase/client"
 import { useRouter } from "next/navigation"
 import {
   MapPin, Clock, Tag, X, UtensilsCrossed, TrendingDown, Filter,
-  ShoppingCart, CheckCircle2, Loader2, AlertCircle
+  ShoppingCart, CheckCircle2, Loader2, AlertCircle, User
 } from "lucide-react"
 
 interface Listing {
@@ -32,7 +32,6 @@ interface Listing {
 
 type SortOption = "price_asc" | "price_desc" | "amount_asc" | "amount_desc" | "newest"
 
-// All-you-care-to-eat buffet halls (one swipe = unlimited food)
 const BUFFET_HALLS = new Set([
   "Third North Dining Hall",
   "Downstein (Weinstein Hall)",
@@ -81,14 +80,14 @@ async function fetchMyPendingListingIds(userId: string): Promise<Set<string>> {
 
 function ListingCardSkeleton() {
   return (
-    <Card className="overflow-hidden">
-      <CardContent className="p-4 space-y-3">
-        <Skeleton className="h-4 w-3/4" />
-        <Skeleton className="h-3 w-1/2" />
-        <Skeleton className="h-8 w-full" />
-        <div className="flex gap-2">
+    <Card className="overflow-hidden border-border">
+      <CardContent className="p-5 space-y-3">
+        <Skeleton className="h-7 w-2/5" />
+        <Skeleton className="h-3.5 w-3/4" />
+        <Skeleton className="h-9 w-full rounded-lg mt-1" />
+        <div className="flex gap-2 pt-1">
           <Skeleton className="h-5 w-16 rounded-full" />
-          <Skeleton className="h-5 w-20 rounded-full" />
+          <Skeleton className="h-5 w-24 rounded-full" />
         </div>
       </CardContent>
     </Card>
@@ -129,16 +128,11 @@ export default function BuyPage() {
     mutationFn: async (listing: Listing) => {
       setBuyError("")
       const supabase = createClient()
-
-      // ensure user row exists
       const { error: userErr } = await supabase.rpc("ensure_current_user_row")
       if (userErr) throw new Error(`Profile error: ${userErr.message}`)
-
-      // fetch pending status id
       const { data: statuses } = await supabase.from("status").select("status_id, status_name")
       const pendingStatus = (statuses ?? []).find((s: any) => s.status_name === "Pending")
       if (!pendingStatus) throw new Error("Status config error")
-
       const { error } = await supabase.from("transaction").insert({
         buyer_id: userId,
         listing_id: listing.listing_id,
@@ -172,12 +166,12 @@ export default function BuyPage() {
   const filtered = sorted.filter((l) => l.price <= priceMax && l.seller_net_id !== userId)
 
   const cardVariants: Variants = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0, y: 16 },
     show: { opacity: 1, y: 0, transition: { duration: 0.3, ease: "easeOut" as const } },
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
+    <div className="min-h-screen bg-background">
       {/* Buy confirmation modal */}
       <AnimatePresence>
         {buyingListing && (
@@ -189,67 +183,70 @@ export default function BuyPage() {
             onClick={() => { setBuyingListing(null); setBuyError("") }}
           >
             <motion.div
-              initial={{ scale: 0.95, opacity: 0, y: 16 }}
+              initial={{ scale: 0.96, opacity: 0, y: 12 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="w-full max-w-sm overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-zinc-900 dark:ring-1 dark:ring-zinc-800"
+              exit={{ scale: 0.96, opacity: 0 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="w-full max-w-sm overflow-hidden rounded-2xl bg-card border border-border shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="h-1.5 bg-gradient-to-r from-[#57068c] to-[#8b2fc9]" />
+              <div className="h-1 bg-gradient-to-r from-brand to-brand-light" />
               <div className="p-6 flex flex-col gap-4">
                 <div className="flex items-start justify-between">
                   <div>
-                    <h2 className="text-lg font-black text-zinc-900 dark:text-white">Confirm Purchase</h2>
-                    <p className="mt-0.5 text-xs font-medium text-zinc-600 dark:text-white">Request will be sent to the seller</p>
+                    <h2 className="text-lg font-bold text-foreground">Confirm Purchase</h2>
+                    <p className="mt-0.5 text-xs text-muted-foreground">Request will be sent to the seller</p>
                   </div>
                   <button
                     onClick={() => { setBuyingListing(null); setBuyError("") }}
-                    className="text-zinc-500 transition-colors hover:text-zinc-700 dark:text-white dark:hover:text-white"
+                    className="text-muted-foreground transition-colors hover:text-foreground rounded-md p-1 hover:bg-accent"
                   >
-                    <X className="w-5 h-5" />
+                    <X className="w-4 h-4" />
                   </button>
                 </div>
 
-                <div className="space-y-2 rounded-xl border border-zinc-100 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-950/60">
+                <div className="space-y-2.5 rounded-xl border border-border bg-muted/40 p-4">
                   <div className="flex justify-between items-baseline">
-                    <span className="text-sm font-medium text-zinc-600 dark:text-white">Price per swipe</span>
-                    <span className="font-black text-[#57068c] text-xl">${buyingListing.price.toFixed(2)}</span>
+                    <span className="text-sm text-muted-foreground">Price per swipe</span>
+                    <span className="font-bold text-brand text-xl">${buyingListing.price.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between items-baseline">
-                    <span className="text-sm font-medium text-zinc-600 dark:text-white">Quantity</span>
-                    <span className="font-bold text-zinc-900 dark:text-white">{buyingListing.amount} swipe{Number(buyingListing.amount) !== 1 ? "s" : ""}</span>
+                    <span className="text-sm text-muted-foreground">Quantity</span>
+                    <span className="font-semibold text-foreground">{buyingListing.amount} swipe{Number(buyingListing.amount) !== 1 ? "s" : ""}</span>
                   </div>
                   {buyingListing.location && (
                     <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium text-zinc-600 dark:text-white">Meet at</span>
-                      <span className="flex items-center gap-1 text-sm font-semibold text-zinc-800 dark:text-white">
-                        <MapPin className="w-3 h-3 text-[#57068c]" />
+                      <span className="text-sm text-muted-foreground">Meet at</span>
+                      <span className="flex items-center gap-1 text-sm font-medium text-foreground">
+                        <MapPin className="w-3 h-3 text-brand" />
                         {buyingListing.location.location}
                       </span>
                     </div>
                   )}
                   <div className="flex justify-between items-baseline">
-                    <span className="text-sm font-medium text-zinc-600 dark:text-white">Seller</span>
-                    <span className="text-sm font-semibold text-zinc-800 dark:text-white">{buyingListing.seller_net_id}@nyu.edu</span>
+                    <span className="text-sm text-muted-foreground">Seller</span>
+                    <span className="flex items-center gap-1 text-sm text-foreground">
+                      <User className="w-3 h-3 text-muted-foreground" />
+                      {buyingListing.seller_net_id}
+                    </span>
                   </div>
-                  <div className="flex justify-between items-baseline border-t border-zinc-200 pt-2 dark:border-zinc-800">
-                    <span className="text-sm font-bold text-zinc-800 dark:text-white">Total</span>
-                    <span className="text-lg font-black text-zinc-900 dark:text-white">
+                  <div className="flex justify-between items-baseline border-t border-border pt-2.5 mt-0.5">
+                    <span className="text-sm font-semibold text-foreground">Total</span>
+                    <span className="text-lg font-bold text-foreground">
                       ${(buyingListing.price * Number(buyingListing.amount)).toFixed(2)}
                     </span>
                   </div>
                 </div>
 
                 {buyError && (
-                  <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2 text-xs text-red-600">
+                  <div className="flex items-center gap-2 bg-destructive/10 border border-destructive/20 rounded-lg px-3 py-2 text-xs text-destructive">
                     <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                     {buyError}
                   </div>
                 )}
 
                 {!userId ? (
-                  <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-xs text-amber-700">
+                  <div className="flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-2 text-xs text-amber-600 dark:text-amber-400">
                     <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                     You must be logged in to buy swipes.
                   </div>
@@ -266,7 +263,7 @@ export default function BuyPage() {
                     )}
                   </Button>
                 )}
-                <p className="text-center text-[10px] font-medium text-zinc-500 dark:text-white">
+                <p className="text-center text-[11px] text-muted-foreground leading-relaxed">
                   You'll coordinate the meetup with the seller after they accept.
                 </p>
               </div>
@@ -276,15 +273,15 @@ export default function BuyPage() {
       </AnimatePresence>
 
       {/* Page header */}
-      <div className="border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950/90">
-        <div className="max-w-7xl mx-auto px-6 py-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="border-b border-border bg-card">
+        <div className="max-w-7xl mx-auto px-6 py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-black text-zinc-900 flex items-center gap-2 dark:text-white">
-              <UtensilsCrossed className="w-6 h-6 text-[#57068c]" />
+            <h1 className="text-xl font-bold text-foreground flex items-center gap-2">
+              <UtensilsCrossed className="w-5 h-5 text-brand" />
               Available Swipes
             </h1>
-            <p className="mt-0.5 text-sm font-medium text-zinc-600 dark:text-white">
-              {isLoading ? "Loading..." : `${filtered.length} listing${filtered.length !== 1 ? "s" : ""} available`}
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              {isLoading ? "Loading listings…" : `${filtered.length} listing${filtered.length !== 1 ? "s" : ""} available`}
             </p>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
@@ -296,8 +293,8 @@ export default function BuyPage() {
                 <SelectItem value="newest">Newest First</SelectItem>
                 <SelectItem value="price_asc">Price: Low to High</SelectItem>
                 <SelectItem value="price_desc">Price: High to Low</SelectItem>
-                <SelectItem value="amount_asc">Amount: Low to High</SelectItem>
-                <SelectItem value="amount_desc">Amount: High to Low</SelectItem>
+                <SelectItem value="amount_asc">Qty: Low to High</SelectItem>
+                <SelectItem value="amount_desc">Qty: High to Low</SelectItem>
               </SelectContent>
             </Select>
             <Button
@@ -308,7 +305,7 @@ export default function BuyPage() {
             >
               <Filter className="w-3.5 h-3.5" />
               Filters
-              {showFilters && <X className="w-3 h-3" />}
+              {showFilters && <X className="w-3 h-3 ml-0.5" />}
             </Button>
           </div>
         </div>
@@ -319,13 +316,13 @@ export default function BuyPage() {
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.25 }}
-              className="overflow-hidden border-t border-zinc-100 dark:border-zinc-800"
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden border-t border-border"
             >
               <div className="max-w-7xl mx-auto px-6 py-4 flex flex-wrap gap-6 items-end">
                 <div className="min-w-56">
-                  <label className="mb-2 block text-xs font-semibold text-zinc-600 dark:text-white">
-                    Max Price: <span className="text-[#57068c] font-bold">${priceMax}</span>
+                  <label className="mb-2 block text-xs font-medium text-muted-foreground">
+                    Max Price: <span className="text-brand font-semibold">${priceMax}</span>
                   </label>
                   <Slider
                     value={priceMax}
@@ -337,7 +334,7 @@ export default function BuyPage() {
                   />
                 </div>
                 <Button variant="outline" size="sm" onClick={() => setPriceMax(20)}>
-                  Reset Filters
+                  Reset
                 </Button>
               </div>
             </motion.div>
@@ -353,87 +350,94 @@ export default function BuyPage() {
           </div>
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-center">
-            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-900">
-              <UtensilsCrossed className="w-8 h-8 text-zinc-500 dark:text-white" />
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-muted">
+              <UtensilsCrossed className="w-7 h-7 text-muted-foreground" />
             </div>
-            <h3 className="mb-1 text-lg font-bold text-zinc-800 dark:text-white">No listings found</h3>
-            <p className="text-sm font-medium text-zinc-500 dark:text-white">Try adjusting your filters or check back later.</p>
+            <h3 className="mb-1 text-base font-semibold text-foreground">No listings found</h3>
+            <p className="text-sm text-muted-foreground">Try adjusting your filters or check back later.</p>
           </div>
         ) : (
           <motion.div
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
             initial="hidden"
             animate="show"
-            variants={{ show: { transition: { staggerChildren: 0.06 } } }}
+            variants={{ show: { transition: { staggerChildren: 0.05 } } }}
           >
             {filtered.map((listing) => {
               const alreadyRequested = pendingIds.has(listing.listing_id) || justBought.has(listing.listing_id)
               return (
-                <motion.div key={listing.listing_id} variants={cardVariants} whileHover={{ y: -3 }}>
-                  <Card className="group relative h-full overflow-hidden border-zinc-200 transition-all duration-200 hover:border-[#57068c]/30 hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-900/80">
+                <motion.div key={listing.listing_id} variants={cardVariants} whileHover={{ y: -2, transition: { duration: 0.15 } }}>
+                  <Card className="group relative h-full overflow-hidden border-border bg-card transition-shadow duration-200 hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-black/30">
                     {listing.discount && listing.discount.discount_rate > 0 && (
-                      <div className="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-black px-2.5 py-1 rounded-bl-xl z-10">
+                      <div className="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-bl-xl z-10">
                         -{Math.round(listing.discount.discount_rate * 100)}% OFF
                       </div>
                     )}
+                    {/* Urgency bar */}
                     <div
-                      className={`h-1 w-full ${
+                      className={`h-0.5 w-full ${
                         listing.urgency?.urgency === "Urgent" ? "bg-red-500" :
                         listing.urgency?.urgency === "High" ? "bg-orange-400" :
                         listing.urgency?.urgency === "Medium" ? "bg-amber-400" :
                         "bg-emerald-400"
                       }`}
                     />
-                    <CardContent className="p-4 flex flex-col gap-3">
+                    <CardContent className="p-5 flex flex-col gap-3">
+                      {/* Price */}
                       <div>
                         <div className="flex items-baseline gap-1.5">
-                          <span className="text-2xl font-black text-[#57068c]">${listing.price.toFixed(2)}</span>
-                          <span className="text-sm font-medium text-zinc-500 dark:text-white">× {listing.amount} swipe{Number(listing.amount) !== 1 ? "s" : ""}</span>
+                          <span className="text-2xl font-bold text-brand">${listing.price.toFixed(2)}</span>
+                          <span className="text-sm text-muted-foreground">× {listing.amount} swipe{Number(listing.amount) !== 1 ? "s" : ""}</span>
                         </div>
-                        <div className="mt-0.5 flex items-center gap-1 text-xs font-medium text-zinc-600 dark:text-white">
+                        <div className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
                           <TrendingDown className="w-3 h-3 text-emerald-500" />
                           <span>${listing.price.toFixed(2)}/ea</span>
                         </div>
                       </div>
 
+                      {/* Type */}
                       {listing.type && (
-                        <div className="rounded-lg border border-zinc-100 bg-zinc-50 px-2.5 py-1.5 text-xs font-semibold text-zinc-700 dark:border-zinc-800 dark:bg-zinc-950/70 dark:text-white">
+                        <div className="rounded-lg border border-border bg-muted/50 px-2.5 py-1.5 text-xs font-medium text-foreground/80">
                           {listing.type.type}
                         </div>
                       )}
 
+                      {/* Location */}
                       {listing.location && (
-                        <div className="flex items-start gap-1.5 text-xs font-medium text-zinc-600 dark:text-white">
-                          <MapPin className="w-3.5 h-3.5 shrink-0 mt-0.5 text-[#57068c]" />
-                          <span className="leading-tight">{listing.location.location}</span>
+                        <div className="flex items-start gap-1.5 text-xs text-muted-foreground">
+                          <MapPin className="w-3.5 h-3.5 shrink-0 mt-0.5 text-brand" />
+                          <span className="leading-tight flex-1">{listing.location.location}</span>
                           {BUFFET_HALLS.has(listing.location.location) && (
-                            <span className="ml-auto shrink-0 text-[9px] font-bold bg-violet-100 text-violet-700 rounded px-1 py-0.5">BUFFET</span>
+                            <span className="shrink-0 text-[9px] font-bold bg-violet-500/10 text-violet-600 dark:text-violet-300 rounded px-1.5 py-0.5">BUFFET</span>
                           )}
                         </div>
                       )}
 
+                      {/* Badges */}
                       <div className="flex flex-wrap gap-1.5 items-center">
                         {listing.urgency && (
                           <Badge variant={urgencyBadgeVariant(listing.urgency.urgency)} className="text-[10px]">
                             {listing.urgency.urgency}
                           </Badge>
                         )}
-                        <div className="flex items-center gap-1 text-[10px] font-medium text-zinc-500 dark:text-white">
+                        <div className="flex items-center gap-1 text-[10px] text-muted-foreground ml-auto">
                           <Tag className="w-3 h-3" />
                           <span>{listing.seller_net_id}</span>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-1 border-t border-zinc-100 pt-2.5 text-[10px] font-medium text-zinc-500 dark:border-zinc-800 dark:text-white">
+                      {/* Expiry */}
+                      <div className="flex items-center gap-1 border-t border-border pt-2.5 text-[10px] text-muted-foreground">
                         <Clock className="w-3 h-3" />
                         <span>Expires {new Date(listing.expiration_date).toLocaleDateString()}</span>
                       </div>
 
+                      {/* Action */}
                       {alreadyRequested ? (
                         <Button
                           size="sm"
                           variant="outline"
-                          className="mt-1 w-full cursor-default gap-1.5 border-emerald-200 bg-emerald-50 text-emerald-600 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-300"
+                          className="mt-1 w-full cursor-default gap-1.5 border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10"
                           disabled
                         >
                           <CheckCircle2 className="w-3.5 h-3.5" />

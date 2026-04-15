@@ -29,6 +29,8 @@
   --surface-2: #e7ece8;
   --surface-3: #d7dfdb;
   --subtle-foreground: #7b8794;
+  --brand: #57068c;
+  --brand-light: #8b2fc9;
   --radius: 0.75rem;
   color-scheme: light;
 }
@@ -60,6 +62,8 @@
   --surface-2: #1c252d;
   --surface-3: #2a3741;
   --subtle-foreground: #7d8d9b;
+  --brand: #c084fc;
+  --brand-light: #d8b4fe;
   color-scheme: dark;
 }
 
@@ -85,6 +89,8 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-brand: var(--brand);
+  --color-brand-light: var(--brand-light);
   --radius-sm: calc(var(--radius) - 0.25rem);
   --radius-md: calc(var(--radius) - 0.125rem);
   --radius-lg: var(--radius);

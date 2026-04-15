@@ -13,7 +13,7 @@ import { createClient } from "@/utils/supabase/client"
 import Link from "next/link"
 import {
   Plus, MapPin, Clock, Tag, CheckCircle2, Circle,
-  PackageCheck, Loader2, AlertCircle, ChevronDown, ChevronUp, Bell
+  PackageCheck, Loader2, AlertCircle, Bell
 } from "lucide-react"
 
 interface Listing {
@@ -66,18 +66,18 @@ async function fetchLookups() {
 }
 
 const rowVariants: Variants = {
-  hidden: { opacity: 0, x: -16 },
+  hidden: { opacity: 0, x: -12 },
   show: (i: number) => ({
     opacity: 1, x: 0,
-    transition: { delay: i * 0.07, duration: 0.3, ease: "easeOut" as const },
+    transition: { delay: i * 0.06, duration: 0.28, ease: "easeOut" as const },
   }),
 }
 
 function SectionHeader({ title, count }: { title: string; count: number }) {
   return (
-    <div className="flex items-center gap-3 mb-4">
-      <h3 className="text-base font-bold text-zinc-900 dark:text-white">{title}</h3>
-      <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-bold text-zinc-700 dark:bg-zinc-900 dark:text-white">{count}</span>
+    <div className="flex items-center gap-2.5 mb-4">
+      <h3 className="text-sm font-semibold text-foreground">{title}</h3>
+      <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-semibold text-muted-foreground">{count}</span>
     </div>
   )
 }
@@ -91,7 +91,6 @@ export default function SellPage() {
 
   useEffect(() => {
     createClient().auth.getUser().then(({ data }) => {
-      // Use net_id from user metadata or email prefix as fallback
       const netId = data.user?.user_metadata?.net_id ?? data.user?.email?.split("@")[0] ?? null
       setUserId(netId)
     })
@@ -115,11 +114,8 @@ export default function SellPage() {
         throw new Error("Please fill in all required fields.")
       }
       const supabase = createClient()
-
-      // Ensure a public.user row exists (SECURITY DEFINER bypasses RLS)
       const { error: userErr } = await supabase.rpc("ensure_current_user_row")
       if (userErr) throw new Error(`Could not create user profile: ${userErr.message}`)
-
       const { error } = await supabase.from("listing").insert({
         seller_net_id: userId,
         preferred_location_id: form.locationId,
@@ -167,14 +163,14 @@ export default function SellPage() {
   })
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
+    <div className="min-h-screen bg-background">
       {/* Pending orders banner */}
       {pendingOrderCount > 0 && (
-        <div className="border-b border-amber-200 bg-amber-50 dark:border-amber-700/30 dark:bg-amber-950/30">
+        <div className="border-b border-amber-500/20 bg-amber-500/10">
           <div className="max-w-5xl mx-auto px-6 py-3 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-2 text-amber-800 dark:text-amber-200">
+            <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
               <Bell className="w-4 h-4" />
-              <span className="text-sm font-semibold">
+              <span className="text-sm font-medium">
                 {pendingOrderCount} new buy request{pendingOrderCount !== 1 ? "s" : ""} waiting for your response
               </span>
             </div>
@@ -182,9 +178,9 @@ export default function SellPage() {
               <Button
                 size="sm"
                 variant="outline"
-                className="h-7 border-amber-300 text-xs text-amber-800 hover:bg-amber-100 dark:border-amber-500/40 dark:text-amber-200 dark:hover:bg-amber-500/10"
+                className="h-7 text-xs border-amber-500/30 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10"
               >
-                View Requests →
+                View →
               </Button>
             </Link>
           </div>
@@ -192,19 +188,14 @@ export default function SellPage() {
       )}
 
       {/* Page header */}
-      <div className="border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950/90">
-        <div className="max-w-5xl mx-auto px-6 py-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="border-b border-border bg-card">
+        <div className="max-w-5xl mx-auto px-6 py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-black text-zinc-900 dark:text-white">My Listings</h1>
-            <p className="mt-0.5 text-sm font-medium text-zinc-600 dark:text-white">
-              Manage your meal swipe postings
-            </p>
+            <h1 className="text-xl font-bold text-foreground">My Listings</h1>
+            <p className="mt-0.5 text-sm text-muted-foreground">Manage your meal swipe postings</p>
           </div>
-          <Button
-            onClick={() => setShowForm(!showForm)}
-            className="gap-2 w-full sm:w-auto"
-          >
-            {showForm ? <><Circle className="w-4 h-4" />Cancel</> : <><Plus className="w-4 h-4" />New Listing</>}
+          <Button onClick={() => setShowForm(!showForm)} className="gap-2 w-full sm:w-auto" size="sm">
+            {showForm ? <><Circle className="w-3.5 h-3.5" />Cancel</> : <><Plus className="w-3.5 h-3.5" />New Listing</>}
           </Button>
         </div>
 
@@ -215,15 +206,15 @@ export default function SellPage() {
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.25 }}
-              className="overflow-hidden border-t border-zinc-100 dark:border-zinc-800"
+              transition={{ duration: 0.22 }}
+              className="overflow-hidden border-t border-border"
             >
               <div className="max-w-5xl mx-auto px-6 py-5">
-                <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-5 dark:border-zinc-800 dark:bg-zinc-900">
-                  <h3 className="mb-4 text-sm font-bold text-zinc-900 dark:text-white">Create New Listing</h3>
+                <div className="rounded-xl border border-border bg-muted/40 p-5">
+                  <p className="mb-4 text-sm font-medium text-foreground">Create New Listing</p>
                   <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
                     <div className="col-span-2 sm:col-span-1 lg:col-span-2">
-                      <label className="mb-1 block text-xs font-medium text-zinc-600 dark:text-white">Location *</label>
+                      <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Location *</label>
                       <Select value={form.locationId} onValueChange={(v) => setForm({ ...form, locationId: v })}>
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="Select location…" />
@@ -236,7 +227,7 @@ export default function SellPage() {
                       </Select>
                     </div>
                     <div>
-                      <label className="mb-1 block text-xs font-medium text-zinc-600 dark:text-white">Type</label>
+                      <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Type</label>
                       <Select value={form.typeId || "__none__"} onValueChange={(v) => setForm({ ...form, typeId: v === "__none__" ? "" : v })}>
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="Any type" />
@@ -250,7 +241,7 @@ export default function SellPage() {
                       </Select>
                     </div>
                     <div>
-                      <label className="mb-1 block text-xs font-medium text-zinc-600 dark:text-white">Urgency</label>
+                      <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Urgency</label>
                       <Select value={form.urgencyId || "__none__"} onValueChange={(v) => setForm({ ...form, urgencyId: v === "__none__" ? "" : v })}>
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="None" />
@@ -264,7 +255,7 @@ export default function SellPage() {
                       </Select>
                     </div>
                     <div>
-                      <label className="mb-1 block text-xs font-medium text-zinc-600 dark:text-white">Qty *</label>
+                      <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Qty *</label>
                       <Input
                         type="number"
                         placeholder="e.g. 3"
@@ -274,10 +265,10 @@ export default function SellPage() {
                       />
                     </div>
                     <div>
-                      <label className="mb-1 block text-xs font-medium text-zinc-600 dark:text-white">Price/ea ($) *</label>
+                      <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Price/ea ($) *</label>
                       <Input
                         type="number"
-                        placeholder="e.g. 5"
+                        placeholder="e.g. 5.00"
                         min={0.01}
                         step={0.01}
                         value={form.price}
@@ -286,7 +277,7 @@ export default function SellPage() {
                     </div>
                   </div>
                   {formError && (
-                    <p className="mt-3 flex items-center gap-1.5 text-xs font-medium text-red-500">
+                    <p className="mt-3 flex items-center gap-1.5 text-xs text-destructive">
                       <AlertCircle className="w-3.5 h-3.5" />
                       {formError}
                     </p>
@@ -325,7 +316,7 @@ export default function SellPage() {
             </div>
           ) : activeListing.length === 0 ? (
             <EmptyState
-              icon={<Tag className="w-6 h-6 text-zinc-500 dark:text-white" />}
+              icon={<Tag className="w-6 h-6 text-muted-foreground" />}
               message="No active listings. Create one to start selling."
             />
           ) : (
@@ -341,18 +332,18 @@ export default function SellPage() {
           )}
         </section>
 
-        {/* Inactive / sold */}
+        {/* Past listings */}
         <section>
           <SectionHeader title="Past Listings" count={inactiveListing.length} />
           {isLoading ? (
             <Skeleton className="h-20 w-full rounded-xl" />
           ) : inactiveListing.length === 0 ? (
             <EmptyState
-              icon={<PackageCheck className="w-6 h-6 text-zinc-500 dark:text-white" />}
+              icon={<PackageCheck className="w-6 h-6 text-muted-foreground" />}
               message="Your completed listings will appear here."
             />
           ) : (
-            <div className="space-y-3 opacity-70">
+            <div className="space-y-3 opacity-60">
               {inactiveListing.map((listing, i) => (
                 <ListingRow key={listing.listing_id} listing={listing} index={i} inactive />
               ))}
@@ -366,9 +357,9 @@ export default function SellPage() {
 
 function EmptyState({ icon, message }: { icon: React.ReactNode; message: string }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-zinc-300 py-12 text-center dark:border-zinc-800 dark:bg-zinc-900/40">
+    <div className="flex flex-col items-center justify-center gap-2.5 rounded-xl border border-dashed border-border py-12 text-center">
       {icon}
-      <p className="text-sm font-medium text-zinc-600 dark:text-white">{message}</p>
+      <p className="text-sm text-muted-foreground">{message}</p>
     </div>
   )
 }
@@ -387,29 +378,29 @@ function ListingRow({
       variants={rowVariants}
       initial="hidden"
       animate="show"
-      whileHover={inactive ? {} : { x: 3 }}
+      whileHover={inactive ? {} : { x: 2 }}
     >
-      <Card className={`overflow-hidden border-zinc-200 dark:border-zinc-800 ${inactive ? "bg-zinc-50 dark:bg-zinc-900/70" : "transition-shadow duration-200 hover:shadow-md dark:bg-zinc-900/80"}`}>
-        <div className={`h-1 ${inactive ? "bg-zinc-300" : "bg-[#57068c]"}`} />
+      <Card className={`overflow-hidden border-border ${inactive ? "bg-muted/20" : "bg-card transition-shadow duration-200 hover:shadow-md hover:shadow-black/5 dark:hover:shadow-black/20"}`}>
+        <div className={`h-0.5 ${inactive ? "bg-border" : "bg-brand"}`} />
         <CardContent className="p-4">
           <div className="flex items-center gap-4 flex-wrap">
             {/* Price */}
             <div className="min-w-[80px]">
-              <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-white">Price</p>
-              <p className="font-black text-[#57068c] text-lg">${listing.price.toFixed(2)}</p>
+              <p className="mb-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Price</p>
+              <p className="font-bold text-brand text-lg">${listing.price.toFixed(2)}</p>
             </div>
 
             {/* Amount */}
-            <div className="min-w-[70px]">
-              <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-white">Swipes</p>
-              <p className="font-bold text-zinc-900 dark:text-white">{listing.amount}</p>
+            <div className="min-w-[64px]">
+              <p className="mb-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Swipes</p>
+              <p className="font-semibold text-foreground">{listing.amount}</p>
             </div>
 
             {/* Location */}
             <div className="flex-1 min-w-[150px]">
-              <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-white">Location</p>
-              <div className="flex items-center gap-1 text-sm font-semibold text-zinc-800 dark:text-white">
-                <MapPin className="w-3.5 h-3.5 text-[#57068c]" />
+              <p className="mb-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Location</p>
+              <div className="flex items-center gap-1 text-sm font-medium text-foreground">
+                <MapPin className="w-3.5 h-3.5 text-brand" />
                 {listing.location?.location ?? "—"}
               </div>
             </div>
@@ -417,15 +408,15 @@ function ListingRow({
             {/* Type */}
             {listing.type && (
               <div className="min-w-[120px]">
-                <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-white">Type</p>
-                <p className="text-xs font-medium text-zinc-700 dark:text-white">{listing.type.type}</p>
+                <p className="mb-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Type</p>
+                <p className="text-xs text-foreground/80">{listing.type.type}</p>
               </div>
             )}
 
             {/* Urgency */}
             {listing.urgency && (
               <div>
-                <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-white">Urgency</p>
+                <p className="mb-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Urgency</p>
                 <Badge
                   variant={
                     listing.urgency.urgency === "Urgent" ? "urgent" :
@@ -442,14 +433,14 @@ function ListingRow({
 
             {/* Date */}
             <div className="min-w-[100px]">
-              <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-white">Posted</p>
-              <div className="flex items-center gap-1 text-xs font-medium text-zinc-600 dark:text-white">
+              <p className="mb-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Posted</p>
+              <div className="flex items-center gap-1 text-xs text-muted-foreground">
                 <Clock className="w-3 h-3" />
                 {new Date(listing.posted_date).toLocaleDateString()}
               </div>
             </div>
 
-            {/* Status / actions */}
+            {/* Actions */}
             <div className="ml-auto flex items-center gap-2">
               {inactive ? (
                 <Badge variant="sold" className="gap-1">
@@ -466,7 +457,7 @@ function ListingRow({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-7 text-xs font-medium text-zinc-500 hover:text-red-500 dark:text-white dark:hover:bg-red-500/10 dark:hover:text-red-300"
+                      className="h-7 text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                       onClick={onDeactivate}
                     >
                       Deactivate

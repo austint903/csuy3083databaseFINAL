@@ -73,10 +73,10 @@ interface EditState {
 }
 
 const cardVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 16 },
   show: (i: number) => ({
     opacity: 1, y: 0,
-    transition: { delay: i * 0.08, duration: 0.35, ease: "easeOut" as const },
+    transition: { delay: i * 0.07, duration: 0.3, ease: "easeOut" as const },
   }),
 }
 
@@ -99,7 +99,6 @@ export default function ModifyPage() {
     enabled: !!userId,
   })
 
-  // Sync editStates when listings load
   useEffect(() => {
     if (listings.length > 0) {
       const states: Record<string, EditState> = {}
@@ -167,20 +166,20 @@ export default function ModifyPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50">
+    <div className="min-h-screen bg-background">
       {/* Page header */}
-      <div className="bg-white border-b border-zinc-200">
-        <div className="max-w-5xl mx-auto px-6 py-6">
-          <div className="flex items-center gap-3 mb-1">
+      <div className="bg-card border-b border-border">
+        <div className="max-w-5xl mx-auto px-6 py-5">
+          <div className="flex items-center gap-2 mb-1">
             <Link href="/sell">
-              <Button variant="ghost" size="sm" className="gap-1.5 -ml-2">
+              <Button variant="ghost" size="sm" className="gap-1.5 -ml-2 text-muted-foreground hover:text-foreground">
                 <ArrowLeft className="w-3.5 h-3.5" />
                 Back
               </Button>
             </Link>
           </div>
-          <h1 className="text-2xl font-black text-zinc-900">Edit Listings</h1>
-          <p className="text-zinc-500 text-sm mt-0.5">Modify your active listings below</p>
+          <h1 className="text-xl font-bold text-foreground">Edit Listings</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">Modify your active listings below</p>
         </div>
       </div>
 
@@ -192,9 +191,9 @@ export default function ModifyPage() {
             ))}
           </div>
         ) : listings.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 rounded-xl border border-dashed border-zinc-300 text-center gap-3">
-            <MapPin className="w-8 h-8 text-zinc-400" />
-            <p className="text-zinc-500">No active listings to edit.</p>
+          <div className="flex flex-col items-center justify-center py-24 rounded-xl border border-dashed border-border text-center gap-3">
+            <MapPin className="w-8 h-8 text-muted-foreground/50" />
+            <p className="text-muted-foreground text-sm">No active listings to edit.</p>
             <Link href="/sell">
               <Button variant="outline" size="sm">Go to Sell Page</Button>
             </Link>
@@ -215,8 +214,8 @@ export default function ModifyPage() {
 
               return (
                 <motion.div key={listing.listing_id} custom={i} variants={cardVariants} initial="hidden" animate="show">
-                  <Card className="border-zinc-200 overflow-hidden hover:shadow-md transition-shadow duration-200">
-                    <div className="h-1 bg-[#57068c]" />
+                  <Card className="border-border bg-card overflow-hidden hover:shadow-md hover:shadow-black/5 dark:hover:shadow-black/20 transition-shadow duration-200">
+                    <div className="h-0.5 bg-brand" />
                     <CardContent className="p-5">
                       {/* Header row */}
                       <div className="flex items-center justify-between mb-5">
@@ -225,12 +224,12 @@ export default function ModifyPage() {
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                             Active
                           </Badge>
-                          <span className="text-xs text-zinc-400 font-mono">{listing.listing_id.slice(0, 8)}…</span>
+                          <span className="text-xs text-muted-foreground font-mono">{listing.listing_id.slice(0, 8)}…</span>
                         </div>
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 text-zinc-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10 dark:hover:text-red-300"
+                          className="h-8 w-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                           onClick={() => deleteMutation.mutate(listing.listing_id)}
                           disabled={isDeleting}
                         >
@@ -245,7 +244,7 @@ export default function ModifyPage() {
                       {/* Fields */}
                       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-4">
                         <div className="col-span-2 sm:col-span-1 lg:col-span-2">
-                          <label className="block text-[10px] uppercase text-zinc-400 tracking-wider mb-1.5">Location</label>
+                          <label className="block text-[10px] uppercase text-muted-foreground tracking-wider mb-1.5">Location</label>
                           <Select value={state.locationId} onValueChange={(v) => setField(listing.listing_id, "locationId", v)}>
                             <SelectTrigger className="w-full">
                               <SelectValue placeholder="Select location…" />
@@ -259,7 +258,7 @@ export default function ModifyPage() {
                         </div>
 
                         <div>
-                          <label className="block text-[10px] uppercase text-zinc-400 tracking-wider mb-1.5">Type</label>
+                          <label className="block text-[10px] uppercase text-muted-foreground tracking-wider mb-1.5">Type</label>
                           <Select value={state.typeId || "__none__"} onValueChange={(v) => setField(listing.listing_id, "typeId", v === "__none__" ? "" : v)}>
                             <SelectTrigger className="w-full">
                               <SelectValue placeholder="None" />
@@ -274,7 +273,7 @@ export default function ModifyPage() {
                         </div>
 
                         <div>
-                          <label className="block text-[10px] uppercase text-zinc-400 tracking-wider mb-1.5">Urgency</label>
+                          <label className="block text-[10px] uppercase text-muted-foreground tracking-wider mb-1.5">Urgency</label>
                           <Select value={state.urgencyId || "__none__"} onValueChange={(v) => setField(listing.listing_id, "urgencyId", v === "__none__" ? "" : v)}>
                             <SelectTrigger className="w-full">
                               <SelectValue placeholder="None" />
@@ -289,7 +288,7 @@ export default function ModifyPage() {
                         </div>
 
                         <div>
-                          <label className="block text-[10px] uppercase text-zinc-400 tracking-wider mb-1.5">Amount</label>
+                          <label className="block text-[10px] uppercase text-muted-foreground tracking-wider mb-1.5">Amount</label>
                           <Input
                             type="number"
                             min={1}
@@ -299,7 +298,7 @@ export default function ModifyPage() {
                         </div>
 
                         <div>
-                          <label className="block text-[10px] uppercase text-zinc-400 tracking-wider mb-1.5">Price ($)</label>
+                          <label className="block text-[10px] uppercase text-muted-foreground tracking-wider mb-1.5">Price ($)</label>
                           <Input
                             type="number"
                             min={0.01}
@@ -311,7 +310,7 @@ export default function ModifyPage() {
                       </div>
 
                       {/* Save row */}
-                      <div className="flex items-center gap-3 pt-3 border-t border-zinc-100">
+                      <div className="flex items-center gap-3 pt-3 border-t border-border">
                         <Button
                           size="sm"
                           onClick={() => updateMutation.mutate({ id: listing.listing_id, state })}
@@ -327,7 +326,7 @@ export default function ModifyPage() {
                           )}
                         </Button>
                         {updateMutation.isError && updateMutation.variables?.id === listing.listing_id && (
-                          <p className="flex items-center gap-1.5 text-red-500 text-xs">
+                          <p className="flex items-center gap-1.5 text-destructive text-xs">
                             <AlertCircle className="w-3.5 h-3.5" />
                             Failed to save
                           </p>

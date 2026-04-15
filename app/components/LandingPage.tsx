@@ -6,10 +6,10 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ModeToggle } from "@/components/mode-toggle"
-import { ArrowRight, ShoppingCart, Tag, Shield, Zap, TrendingDown } from "lucide-react"
+import { ArrowRight, ShoppingCart, Tag, Shield, Zap, TrendingDown, UtensilsCrossed, MessageSquare } from "lucide-react"
 
 const fadeUp: Variants = {
-  hidden: { opacity: 0, y: 24 },
+  hidden: { opacity: 0, y: 20 },
   show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] } },
 }
 
@@ -23,25 +23,25 @@ const features = [
     icon: ShoppingCart,
     title: "Buy Swipes",
     description: "Get meal swipes below dining-plan rates. Pay less, eat the same.",
-    color: "bg-primary/10 text-primary",
+    color: "bg-brand/10 text-brand",
   },
   {
     icon: Tag,
     title: "Sell Swipes",
     description: "Turn leftover swipes into cash before they expire.",
-    color: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-300",
+    color: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
   },
   {
     icon: Shield,
     title: "Verified Students",
     description: "Only verified university students can join and trade.",
-    color: "bg-sky-500/10 text-sky-600 dark:text-sky-300",
+    color: "bg-sky-500/10 text-sky-600 dark:text-sky-400",
   },
   {
     icon: Zap,
-    title: "Instant Matching",
+    title: "Fast Matching",
     description: "Post a listing and get matched with buyers near your location.",
-    color: "bg-amber-500/10 text-amber-600 dark:text-amber-300",
+    color: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
   },
 ]
 
@@ -68,12 +68,13 @@ export function LandingPage({ isLoggedIn }: LandingPageProps) {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      {/* Nav */}
       <header className="sticky top-0 z-50 flex h-16 items-center justify-between border-b border-border/80 bg-background/85 px-6 backdrop-blur-md md:px-10">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-            <span className="text-white text-sm font-black">S</span>
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary">
+            <UtensilsCrossed className="w-3.5 h-3.5 text-primary-foreground" />
           </div>
-          <span className="text-base font-bold text-foreground">
+          <span className="text-sm font-bold text-foreground">
             Swipe<span className="text-primary">Market</span>
           </span>
         </div>
@@ -91,23 +92,24 @@ export function LandingPage({ isLoggedIn }: LandingPageProps) {
         </div>
       </header>
 
-      <section className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-800 to-stone-800 px-6 py-24 md:py-36">
+      {/* Hero */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-stone-900 px-6 py-24 md:py-36">
         <div
-          className="absolute inset-0 opacity-[0.07]"
+          className="absolute inset-0 opacity-[0.05]"
           style={{
             backgroundImage:
               "linear-gradient(rgba(255,255,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px)",
             backgroundSize: "60px 60px",
           }}
         />
-        <div className="pointer-events-none absolute -left-40 -top-40 h-[500px] w-[500px] rounded-full bg-sky-300/10 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-40 -right-40 h-[500px] w-[500px] rounded-full bg-amber-200/10 blur-3xl" />
+        <div className="pointer-events-none absolute -left-40 -top-40 h-[500px] w-[500px] rounded-full bg-violet-500/8 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-40 -right-40 h-[500px] w-[500px] rounded-full bg-amber-500/8 blur-3xl" />
 
         <motion.div
           variants={stagger}
           initial="hidden"
           animate="show"
-          className="relative z-10 mx-auto flex max-w-3xl flex-col items-center gap-7 text-center"
+          className="relative z-10 mx-auto flex max-w-3xl flex-col items-center gap-6 text-center"
         >
           <motion.div variants={fadeUp}>
             <Badge variant="glass" className="gap-1.5 px-3 py-1 text-xs">
@@ -118,23 +120,23 @@ export function LandingPage({ isLoggedIn }: LandingPageProps) {
 
           <motion.h1
             variants={fadeUp}
-            className="text-5xl font-black leading-[1.05] tracking-tight text-white md:text-6xl lg:text-7xl"
+            className="text-5xl font-black leading-[1.05] tracking-tight text-white md:text-6xl"
           >
             Trade Meal Swipes.
             <br />
-            <span className="text-slate-200">Save Real Money.</span>
+            <span className="text-slate-300">Save Real Money.</span>
           </motion.h1>
 
           <motion.p
             variants={fadeUp}
-            className="max-w-lg text-lg leading-relaxed text-slate-300/85"
+            className="max-w-md text-base leading-relaxed text-slate-400"
           >
             The peer-to-peer marketplace for university meal swipes. Buy cheap, sell extra — never let a swipe expire again.
           </motion.p>
 
           <motion.div variants={fadeUp} className="flex flex-wrap justify-center gap-3">
             <Link href={heroPrimaryHref}>
-              <Button size="lg" variant="white" className="gap-2 font-semibold shadow-lg shadow-black/20">
+              <Button size="lg" variant="white" className="gap-2 font-semibold shadow-lg shadow-black/30">
                 {heroPrimaryLabel}
                 <ArrowRight className="h-4 w-4" />
               </Button>
@@ -148,48 +150,50 @@ export function LandingPage({ isLoggedIn }: LandingPageProps) {
         </motion.div>
       </section>
 
+      {/* Stats */}
       <section className="border-b border-border bg-card">
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 0, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.4 }}
           className="mx-auto grid max-w-4xl grid-cols-2 gap-6 px-6 py-10 md:grid-cols-4 md:gap-0 md:divide-x md:divide-border"
         >
           {stats.map((s) => (
             <div key={s.label} className="px-4 text-center">
-              <div className="text-3xl font-black text-primary">{s.value}</div>
-              <div className="mt-0.5 text-sm text-zinc-500">{s.label}</div>
+              <div className="text-2xl font-black text-brand">{s.value}</div>
+              <div className="mt-0.5 text-xs text-muted-foreground">{s.label}</div>
             </div>
           ))}
         </motion.div>
       </section>
 
-      <section className="bg-zinc-50 px-6 py-24">
+      {/* Features */}
+      <section className="bg-background px-6 py-20">
         <motion.div
           variants={stagger}
           initial="hidden"
           whileInView="show"
-          viewport={{ once: true, margin: "-80px" }}
+          viewport={{ once: true, margin: "-60px" }}
           className="mx-auto max-w-5xl"
         >
-          <motion.div variants={fadeUp} className="mb-14 text-center">
-            <h2 className="text-3xl font-black text-zinc-900 md:text-4xl">How it works</h2>
-            <p className="mx-auto mt-3 max-w-md text-base text-zinc-500">
+          <motion.div variants={fadeUp} className="mb-12 text-center">
+            <h2 className="text-2xl font-black text-foreground md:text-3xl">How it works</h2>
+            <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
               Simple, fast, and built for university students.
             </p>
           </motion.div>
 
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {features.map((feature) => (
               <motion.div key={feature.title} variants={fadeUp}>
-                <Card className="h-full border-zinc-200 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
-                  <CardContent className="p-6">
-                    <div className={`mb-4 flex h-10 w-10 items-center justify-center rounded-xl ${feature.color}`}>
-                      <feature.icon className="h-5 w-5" />
+                <Card className="h-full border-border bg-card transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:shadow-black/5 dark:hover:shadow-black/20">
+                  <CardContent className="p-5">
+                    <div className={`mb-4 flex h-9 w-9 items-center justify-center rounded-xl ${feature.color}`}>
+                      <feature.icon className="h-4 w-4" />
                     </div>
-                    <h3 className="mb-2 font-bold text-zinc-900">{feature.title}</h3>
-                    <p className="text-sm leading-relaxed text-zinc-500">{feature.description}</p>
+                    <h3 className="mb-1.5 text-sm font-bold text-foreground">{feature.title}</h3>
+                    <p className="text-sm leading-relaxed text-muted-foreground">{feature.description}</p>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -198,18 +202,19 @@ export function LandingPage({ isLoggedIn }: LandingPageProps) {
         </motion.div>
       </section>
 
-      <section className="bg-white px-6 py-24">
+      {/* Steps */}
+      <section className="bg-card border-y border-border px-6 py-20">
         <motion.div
           variants={stagger}
           initial="hidden"
           whileInView="show"
-          viewport={{ once: true, margin: "-80px" }}
-          className="mx-auto max-w-3xl"
+          viewport={{ once: true, margin: "-60px" }}
+          className="mx-auto max-w-2xl"
         >
-          <motion.div variants={fadeUp} className="mb-14 text-center">
-            <h2 className="text-3xl font-black text-zinc-900 md:text-4xl">Three simple steps</h2>
+          <motion.div variants={fadeUp} className="mb-12 text-center">
+            <h2 className="text-2xl font-black text-foreground md:text-3xl">Three simple steps</h2>
           </motion.div>
-          <div className="space-y-6">
+          <div className="space-y-5">
             {[
               { step: "01", title: "Sign in with your university account", desc: "Verified automatically — no extra steps." },
               { step: "02", title: "Browse or post a listing", desc: "Find swipes near your location, or post your extras in seconds." },
@@ -218,14 +223,14 @@ export function LandingPage({ isLoggedIn }: LandingPageProps) {
               <motion.div
                 key={item.step}
                 variants={fadeUp}
-                className="flex items-start gap-5"
+                className="flex items-start gap-4"
               >
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary text-sm font-black text-primary-foreground">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-xs font-black text-brand">
                   {item.step}
                 </div>
-                <div className="pt-1">
-                  <h3 className="mb-1 font-bold text-zinc-900">{item.title}</h3>
-                  <p className="text-sm text-zinc-500">{item.desc}</p>
+                <div className="pt-0.5">
+                  <h3 className="mb-0.5 text-sm font-semibold text-foreground">{item.title}</h3>
+                  <p className="text-sm text-muted-foreground">{item.desc}</p>
                 </div>
               </motion.div>
             ))}
@@ -233,21 +238,62 @@ export function LandingPage({ isLoggedIn }: LandingPageProps) {
         </motion.div>
       </section>
 
-      <section className="bg-gradient-to-br from-slate-900 via-slate-800 to-stone-800 px-6 py-20 text-center">
+      {/* Coming soon: SSO + Messaging */}
+      <section className="bg-background px-6 py-16">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="mx-auto flex max-w-lg flex-col items-center gap-5"
+          transition={{ duration: 0.4 }}
+          className="mx-auto max-w-5xl"
         >
-          <TrendingDown className="h-10 w-10 text-slate-300" />
-          <h2 className="text-3xl font-black text-white md:text-4xl">Ready to start saving?</h2>
-          <p className="text-base text-slate-300">
+          <div className="text-center mb-10">
+            <h2 className="text-xl font-black text-foreground">Coming Soon</h2>
+            <p className="mt-1.5 text-sm text-muted-foreground">Features we're working on</p>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
+            <Card className="border-border bg-card border-dashed">
+              <CardContent className="p-5 flex items-start gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-muted">
+                  <Shield className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-foreground">University SSO</h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">Sign in seamlessly with your university single sign-on credentials.</p>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="border-border bg-card border-dashed">
+              <CardContent className="p-5 flex items-start gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-muted">
+                  <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-foreground">In-App Messaging</h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">Chat directly with buyers and sellers to coordinate meetups.</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* CTA */}
+      <section className="bg-gradient-to-br from-slate-900 via-slate-800 to-stone-900 px-6 py-20 text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.4 }}
+          className="mx-auto flex max-w-lg flex-col items-center gap-4"
+        >
+          <TrendingDown className="h-8 w-8 text-slate-400" />
+          <h2 className="text-2xl font-black text-white md:text-3xl">Ready to start saving?</h2>
+          <p className="text-sm text-slate-400">
             Join hundreds of students already trading swipes on campus.
           </p>
           <Link href={ctaHref}>
-            <Button size="lg" variant="white" className="gap-2 font-semibold shadow-lg shadow-black/20">
+            <Button size="lg" variant="white" className="gap-2 font-semibold shadow-lg shadow-black/30 mt-2">
               {ctaLabel}
               <ArrowRight className="h-4 w-4" />
             </Button>
@@ -255,15 +301,16 @@ export function LandingPage({ isLoggedIn }: LandingPageProps) {
         </motion.div>
       </section>
 
-      <footer className="border-t border-border bg-card px-6 py-8">
-        <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-4 sm:flex-row">
+      {/* Footer */}
+      <footer className="border-t border-border bg-card px-6 py-6">
+        <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-3 sm:flex-row">
           <div className="flex items-center gap-2">
-            <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary">
-              <span className="text-white text-xs font-black">S</span>
+            <div className="flex h-5 w-5 items-center justify-center rounded-md bg-primary">
+              <UtensilsCrossed className="w-3 h-3 text-primary-foreground" />
             </div>
-            <span className="text-sm font-medium text-zinc-500">SwipeMarket</span>
+            <span className="text-xs font-medium text-muted-foreground">SwipeMarket</span>
           </div>
-          <p className="text-xs text-zinc-400">Not affiliated with any official university dining program. For students, by students.</p>
+          <p className="text-xs text-muted-foreground/70">Not affiliated with any official university dining program. For students, by students.</p>
         </div>
       </footer>
     </div>

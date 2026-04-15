@@ -3,15 +3,16 @@
 import { useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { motion, type Variants } from "framer-motion"
+import { motion, AnimatePresence, type Variants } from "framer-motion"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
 import { createClient } from "@/utils/supabase/client"
 import {
   MapPin, Clock, ShoppingBag, Tag, CheckCircle2, XCircle,
-  PackageCheck, User, ChevronRight, Loader2
+  PackageCheck, User, Loader2, Star, Pencil, Save, X
 } from "lucide-react"
 
 interface Transaction {
@@ -35,13 +36,27 @@ interface SaleTransaction extends Transaction {
   buyer: { first_name: string; last_name: string; net_id: string } | null
 }
 
+interface UserProfile {
+  net_id: string
+  first_name: string
+  last_name: string
+  phone_number: string
+}
+
+interface Comment {
+  comment_id: string
+  rating: number
+  comment: string
+  transaction_id: string
+}
+
 function statusColor(name: string) {
   switch (name) {
-    case "Pending":   return "bg-amber-50 text-amber-700 border-amber-200"
-    case "Confirmed": return "bg-blue-50 text-blue-700 border-blue-200"
-    case "Completed": return "bg-emerald-50 text-emerald-700 border-emerald-200"
-    case "Cancelled": return "bg-zinc-100 text-zinc-500 border-zinc-200"
-    default:          return "bg-zinc-100 text-zinc-500 border-zinc-200"
+    case "Pending":   return "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20"
+    case "Confirmed": return "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20"
+    case "Completed": return "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+    case "Cancelled": return "bg-muted text-muted-foreground border-border"
+    default:          return "bg-muted text-muted-foreground border-border"
   }
 }
 
@@ -86,14 +101,12 @@ async function fetchPurchases(userId: string): Promise<Transaction[]> {
 
 async function fetchSales(userId: string): Promise<SaleTransaction[]> {
   const supabase = createClient()
-  // Get listing IDs for this seller
   const { data: myListings } = await supabase
     .from("listing")
     .select("listing_id")
     .eq("seller_net_id", userId)
   if (!myListings || myListings.length === 0) return []
   const listingIds = myListings.map((l: any) => l.listing_id)
-
   const { data, error } = await supabase
     .from("transaction")
     .select(`
@@ -118,16 +131,29 @@ async function fetchStatuses() {
   return data ?? []
 }
 
+async function fetchUserProfile(netId: string): Promise<UserProfile | null> {
+  const supabase = createClient()
+  const { data } = await supabase.from("user").select("net_id, first_name, last_name, phone_number").eq("net_id", netId).single()
+  return data as UserProfile | null
+}
+
+async function fetchComments(transactionIds: string[]): Promise<Comment[]> {
+  if (transactionIds.length === 0) return []
+  const supabase = createClient()
+  const { data } = await supabase.from("comment").select("*").in("transaction_id", transactionIds)
+  return (data ?? []) as Comment[]
+}
+
 const rowVariants: Variants = {
-  hidden: { opacity: 0, y: 12 },
-  show: (i: number) => ({ opacity: 1, y: 0, transition: { delay: i * 0.06, duration: 0.3 } }),
+  hidden: { opacity: 0, y: 10 },
+  show: (i: number) => ({ opacity: 1, y: 0, transition: { delay: i * 0.05, duration: 0.28 } }),
 }
 
 function EmptyState({ icon, message }: { icon: React.ReactNode; message: string }) {
   return (
-    <div className="flex flex-col items-center justify-center py-16 rounded-xl border border-dashed border-zinc-300 text-center gap-3">
+    <div className="flex flex-col items-center justify-center py-16 rounded-xl border border-dashed border-border text-center gap-3">
       {icon}
-      <p className="text-zinc-500 text-sm">{message}</p>
+      <p className="text-muted-foreground text-sm">{message}</p>
     </div>
   )
 }
@@ -140,6 +166,32 @@ function TransactionSkeleton() {
   )
 }
 
+function StarRating({ value, onChange }: { value: number; onChange: (v: number) => void }) {
+  const [hovered, setHovered] = useState(0)
+  return (
+    <div className="flex gap-1">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <button
+          key={star}
+          type="button"
+          onClick={() => onChange(star)}
+          onMouseEnter={() => setHovered(star)}
+          onMouseLeave={() => setHovered(0)}
+          className="transition-transform hover:scale-110 cursor-pointer"
+        >
+          <Star
+            className={`w-6 h-6 transition-colors ${
+              star <= (hovered || value)
+                ? "fill-amber-400 text-amber-400"
+                : "text-muted-foreground/40"
+            }`}
+          />
+        </button>
+      ))}
+    </div>
+  )
+}
+
 export default function ProfilePage() {
   const queryClient = useQueryClient()
   const searchParams = useSearchParams()
@@ -148,6 +200,15 @@ export default function ProfilePage() {
   const [tab, setTab] = useState<"purchases" | "sales">(
     searchParams.get("tab") === "sales" ? "sales" : "purchases"
   )
+
+  // Profile editing state
+  const [editingProfile, setEditingProfile] = useState(false)
+  const [profileForm, setProfileForm] = useState({ first_name: "", last_name: "", phone_number: "" })
+
+  // Rating state
+  const [ratingTx, setRatingTx] = useState<string | null>(null)
+  const [ratingValue, setRatingValue] = useState(0)
+  const [ratingComment, setRatingComment] = useState("")
 
   useEffect(() => {
     createClient().auth.getUser().then(({ data }) => {
@@ -173,6 +234,30 @@ export default function ProfilePage() {
     queryKey: ["statuses"],
     queryFn: fetchStatuses,
   })
+
+  const { data: userProfile } = useQuery({
+    queryKey: ["user-profile", userId],
+    queryFn: () => fetchUserProfile(userId!),
+    enabled: !!userId,
+  })
+
+  const purchaseTxIds = purchases.map((p) => p.transaction_id)
+  const { data: comments = [] } = useQuery({
+    queryKey: ["comments", purchaseTxIds.join(",")],
+    queryFn: () => fetchComments(purchaseTxIds),
+    enabled: purchaseTxIds.length > 0,
+  })
+
+  // Sync form when profile loads
+  useEffect(() => {
+    if (userProfile) {
+      setProfileForm({
+        first_name: userProfile.first_name ?? "",
+        last_name: userProfile.last_name ?? "",
+        phone_number: userProfile.phone_number ?? "",
+      })
+    }
+  }, [userProfile])
 
   const statusId = (name: string) => (statuses as any[]).find((s) => s.status_name === name)?.status_id
 
@@ -208,23 +293,135 @@ export default function ProfilePage() {
     },
   })
 
+  const saveProfileMutation = useMutation({
+    mutationFn: async () => {
+      const supabase = createClient()
+      const { error } = await supabase
+        .from("user")
+        .update({
+          first_name: profileForm.first_name,
+          last_name: profileForm.last_name,
+          phone_number: profileForm.phone_number,
+        })
+        .eq("net_id", userId!)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-profile", userId] })
+      setEditingProfile(false)
+    },
+  })
+
+  const submitRatingMutation = useMutation({
+    mutationFn: async ({ transactionId, rating, comment }: { transactionId: string; rating: number; comment: string }) => {
+      const supabase = createClient()
+      const { error } = await supabase.from("comment").insert({
+        transaction_id: transactionId,
+        rating,
+        comment,
+      })
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["comments", purchaseTxIds.join(",")] })
+      setRatingTx(null)
+      setRatingValue(0)
+      setRatingComment("")
+    },
+  })
+
+  const commentByTxId = new Map(comments.map((c) => [c.transaction_id, c]))
+  const displayName = userProfile
+    ? [userProfile.first_name, userProfile.last_name].filter(Boolean).join(" ") || userId
+    : userId
+
   return (
-    <div className="min-h-screen bg-zinc-50">
-      {/* Header */}
-      <div className="bg-white border-b border-zinc-200">
+    <div className="min-h-screen bg-background">
+      {/* Profile header */}
+      <div className="bg-card border-b border-border">
         <div className="max-w-4xl mx-auto px-6 py-6">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-[#57068c] flex items-center justify-center text-white font-black text-lg">
-              {userEmail?.[0]?.toUpperCase() ?? "?"}
+          <div className="flex items-start justify-between gap-4 flex-wrap">
+            <div className="flex items-center gap-4">
+              <div className="w-11 h-11 rounded-full bg-brand flex items-center justify-center text-white font-bold text-base shrink-0">
+                {(userProfile?.first_name?.[0] ?? userEmail?.[0] ?? "?").toUpperCase()}
+              </div>
+              <div>
+                <h1 className="text-lg font-bold text-foreground leading-tight">
+                  {displayName}
+                </h1>
+                <p className="text-sm text-muted-foreground">{userEmail ?? "Not logged in"}</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-2xl font-black text-zinc-900">My Profile</h1>
-              <p className="text-zinc-500 text-sm">{userEmail ?? "Not logged in"}</p>
-            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5"
+              onClick={() => setEditingProfile(!editingProfile)}
+            >
+              {editingProfile ? <X className="w-3.5 h-3.5" /> : <Pencil className="w-3.5 h-3.5" />}
+              {editingProfile ? "Cancel" : "Edit Profile"}
+            </Button>
           </div>
 
+          {/* Inline profile editor */}
+          <AnimatePresence>
+            {editingProfile && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="overflow-hidden"
+              >
+                <div className="mt-5 rounded-xl border border-border bg-muted/40 p-4">
+                  <p className="text-xs font-medium text-muted-foreground mb-3">Update your profile</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-xs font-medium text-muted-foreground mb-1.5">First Name</label>
+                      <Input
+                        placeholder="First name"
+                        value={profileForm.first_name}
+                        onChange={(e) => setProfileForm({ ...profileForm, first_name: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-muted-foreground mb-1.5">Last Name</label>
+                      <Input
+                        placeholder="Last name"
+                        value={profileForm.last_name}
+                        onChange={(e) => setProfileForm({ ...profileForm, last_name: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-muted-foreground mb-1.5">Phone Number</label>
+                      <Input
+                        placeholder="e.g. (123) 456-7890"
+                        value={profileForm.phone_number}
+                        onChange={(e) => setProfileForm({ ...profileForm, phone_number: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex gap-2 mt-4">
+                    <Button
+                      size="sm"
+                      className="gap-1.5"
+                      onClick={() => saveProfileMutation.mutate()}
+                      disabled={saveProfileMutation.isPending}
+                    >
+                      {saveProfileMutation.isPending ? (
+                        <><Loader2 className="w-3.5 h-3.5 animate-spin" />Saving…</>
+                      ) : (
+                        <><Save className="w-3.5 h-3.5" />Save Changes</>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           {/* Tabs */}
-          <div className="flex mt-6 border-b border-zinc-100 gap-1">
+          <div className="flex mt-6 border-b border-border gap-0.5">
             {([
               { key: "purchases", label: "My Purchases", icon: ShoppingBag, count: purchases.length },
               { key: "sales",     label: "My Sales",     icon: Tag,         count: sales.length },
@@ -232,16 +429,16 @@ export default function ProfilePage() {
               <button
                 key={key}
                 onClick={() => setTab(key)}
-                className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold border-b-2 -mb-px transition-colors cursor-pointer ${
+                className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-all cursor-pointer ${
                   tab === key
-                    ? "border-[#57068c] text-[#57068c]"
-                    : "border-transparent text-zinc-500 hover:text-zinc-800"
+                    ? "border-brand text-brand"
+                    : "border-transparent text-muted-foreground hover:text-foreground"
                 }`}
               >
                 <Icon className="w-4 h-4" />
                 {label}
-                <span className={`text-xs rounded-full px-1.5 py-0.5 font-bold ${
-                  tab === key ? "bg-[#57068c] text-white" : "bg-zinc-100 text-zinc-500"
+                <span className={`text-xs rounded-full px-1.5 py-0.5 font-semibold transition-colors ${
+                  tab === key ? "bg-brand text-white" : "bg-muted text-muted-foreground"
                 }`}>{count}</span>
               </button>
             ))}
@@ -253,59 +450,121 @@ export default function ProfilePage() {
         {/* PURCHASES TAB */}
         {tab === "purchases" && (
           <div>
-            <p className="text-xs text-zinc-400 mb-4">Swipes you've requested to buy</p>
+            <p className="text-xs text-muted-foreground mb-5">Swipes you've requested to buy</p>
             {loadingPurchases ? <TransactionSkeleton /> : purchases.length === 0 ? (
               <EmptyState
-                icon={<ShoppingBag className="w-8 h-8 text-zinc-300" />}
+                icon={<ShoppingBag className="w-8 h-8 text-muted-foreground/50" />}
                 message="You haven't bought any swipes yet. Browse listings to get started."
               />
             ) : (
               <div className="space-y-3">
                 {purchases.map((tx, i) => {
                   const statusName = tx.status?.status_name ?? "Unknown"
+                  const existingComment = commentByTxId.get(tx.transaction_id)
+                  const isRating = ratingTx === tx.transaction_id
                   return (
                     <motion.div key={tx.transaction_id} custom={i} variants={rowVariants} initial="hidden" animate="show">
-                      <Card className="border-zinc-200 overflow-hidden hover:shadow-md transition-shadow">
-                        <div className={`h-1 ${
-                          statusName === "Completed" ? "bg-emerald-400" :
-                          statusName === "Confirmed" ? "bg-blue-400" :
-                          statusName === "Pending"   ? "bg-amber-400" : "bg-zinc-300"
+                      <Card className="border-border bg-card overflow-hidden hover:shadow-md hover:shadow-black/5 dark:hover:shadow-black/20 transition-shadow">
+                        <div className={`h-0.5 ${
+                          statusName === "Completed" ? "bg-emerald-500" :
+                          statusName === "Confirmed" ? "bg-blue-500" :
+                          statusName === "Pending"   ? "bg-amber-400" : "bg-border"
                         }`} />
                         <CardContent className="p-4">
                           <div className="flex flex-wrap items-start gap-4">
                             <div className="flex-1 min-w-0 space-y-2">
                               <div className="flex items-center gap-3 flex-wrap">
-                                <span className="text-xl font-black text-[#57068c]">
+                                <span className="text-xl font-bold text-brand">
                                   ${tx.listing?.price.toFixed(2)}
                                 </span>
-                                <span className="text-sm text-zinc-500">
+                                <span className="text-sm text-muted-foreground">
                                   × {tx.listing?.amount} swipe{Number(tx.listing?.amount) !== 1 ? "s" : ""}
                                 </span>
                                 {tx.listing?.type && (
-                                  <span className="text-xs bg-zinc-100 text-zinc-600 rounded-md px-2 py-0.5">
+                                  <span className="text-xs bg-muted text-muted-foreground rounded-md px-2 py-0.5">
                                     {tx.listing.type.type}
                                   </span>
                                 )}
                               </div>
                               {tx.listing?.location && (
-                                <div className="flex items-center gap-1 text-xs text-zinc-500">
-                                  <MapPin className="w-3 h-3 text-[#57068c]" />
+                                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                  <MapPin className="w-3 h-3 text-brand" />
                                   {tx.listing.location.location}
                                 </div>
                               )}
-                              <div className="flex items-center gap-3 flex-wrap text-xs text-zinc-400">
+                              <div className="flex items-center gap-3 flex-wrap text-xs text-muted-foreground">
                                 <div className="flex items-center gap-1">
                                   <User className="w-3 h-3" />
-                                  Seller: <span className="font-medium text-zinc-600">{tx.listing?.seller_net_id}@nyu.edu</span>
+                                  Seller: <span className="font-medium text-foreground/80 ml-0.5">{tx.listing?.seller_net_id}</span>
                                 </div>
                                 <div className="flex items-center gap-1">
                                   <Clock className="w-3 h-3" />
                                   {new Date(tx.transaction_time).toLocaleDateString()}
                                 </div>
                               </div>
+
+                              {/* Rating display or form */}
+                              {statusName === "Completed" && (
+                                <div className="mt-1">
+                                  {existingComment ? (
+                                    <div className="flex items-center gap-2 mt-1">
+                                      <div className="flex gap-0.5">
+                                        {[1,2,3,4,5].map((s) => (
+                                          <Star key={s} className={`w-3.5 h-3.5 ${s <= existingComment.rating ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30"}`} />
+                                        ))}
+                                      </div>
+                                      <span className="text-xs text-muted-foreground">{existingComment.comment}</span>
+                                    </div>
+                                  ) : isRating ? (
+                                    <div className="mt-2 space-y-2">
+                                      <StarRating value={ratingValue} onChange={setRatingValue} />
+                                      <Input
+                                        placeholder="Leave a comment (optional)"
+                                        value={ratingComment}
+                                        onChange={(e) => setRatingComment(e.target.value)}
+                                        className="text-xs h-8"
+                                      />
+                                      <div className="flex gap-2">
+                                        <Button
+                                          size="sm"
+                                          className="h-7 text-xs gap-1"
+                                          disabled={ratingValue === 0 || submitRatingMutation.isPending}
+                                          onClick={() => submitRatingMutation.mutate({
+                                            transactionId: tx.transaction_id,
+                                            rating: ratingValue,
+                                            comment: ratingComment,
+                                          })}
+                                        >
+                                          {submitRatingMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Star className="w-3 h-3" />}
+                                          Submit
+                                        </Button>
+                                        <Button
+                                          size="sm"
+                                          variant="ghost"
+                                          className="h-7 text-xs"
+                                          onClick={() => { setRatingTx(null); setRatingValue(0); setRatingComment("") }}
+                                        >
+                                          Cancel
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      className="h-7 text-xs gap-1 text-muted-foreground hover:text-foreground mt-1 -ml-1"
+                                      onClick={() => { setRatingTx(tx.transaction_id); setRatingValue(0); setRatingComment("") }}
+                                    >
+                                      <Star className="w-3 h-3" />
+                                      Rate this transaction
+                                    </Button>
+                                  )}
+                                </div>
+                              )}
                             </div>
+
                             <div className="flex flex-col items-end gap-2">
-                              <span className={`text-xs font-semibold border rounded-full px-2.5 py-1 ${statusColor(statusName)}`}>
+                              <span className={`text-xs font-medium border rounded-full px-2.5 py-1 ${statusColor(statusName)}`}>
                                 {buyerStatusLabel(statusName)}
                               </span>
                               {statusName === "Confirmed" && !tx.buyer_confirm && (
@@ -325,7 +584,9 @@ export default function ProfilePage() {
                                 </Button>
                               )}
                               {statusName === "Confirmed" && tx.buyer_confirm && (
-                                <span className="text-[10px] text-emerald-600 font-medium">You confirmed ✓</span>
+                                <span className="text-[10px] text-emerald-500 dark:text-emerald-400 font-medium flex items-center gap-1">
+                                  <CheckCircle2 className="w-3 h-3" /> You confirmed
+                                </span>
                               )}
                             </div>
                           </div>
@@ -342,10 +603,10 @@ export default function ProfilePage() {
         {/* SALES TAB */}
         {tab === "sales" && (
           <div>
-            <p className="text-xs text-zinc-400 mb-4">Buy requests for your listings</p>
+            <p className="text-xs text-muted-foreground mb-5">Buy requests for your listings</p>
             {loadingSales ? <TransactionSkeleton /> : sales.length === 0 ? (
               <EmptyState
-                icon={<PackageCheck className="w-8 h-8 text-zinc-300" />}
+                icon={<PackageCheck className="w-8 h-8 text-muted-foreground/50" />}
                 message="No buy requests yet. Post a listing to start selling."
               />
             ) : (
@@ -358,41 +619,41 @@ export default function ProfilePage() {
                     (updateStatusMutation.variables as any)?.transactionId === tx.transaction_id
                   return (
                     <motion.div key={tx.transaction_id} custom={i} variants={rowVariants} initial="hidden" animate="show">
-                      <Card className="border-zinc-200 overflow-hidden hover:shadow-md transition-shadow">
-                        <div className={`h-1 ${
-                          statusName === "Completed" ? "bg-emerald-400" :
-                          statusName === "Confirmed" ? "bg-blue-400" :
-                          statusName === "Pending"   ? "bg-amber-400" : "bg-zinc-300"
+                      <Card className="border-border bg-card overflow-hidden hover:shadow-md hover:shadow-black/5 dark:hover:shadow-black/20 transition-shadow">
+                        <div className={`h-0.5 ${
+                          statusName === "Completed" ? "bg-emerald-500" :
+                          statusName === "Confirmed" ? "bg-blue-500" :
+                          statusName === "Pending"   ? "bg-amber-400" : "bg-border"
                         }`} />
                         <CardContent className="p-4">
                           <div className="flex flex-wrap items-start gap-4">
                             <div className="flex-1 min-w-0 space-y-2">
                               <div className="flex items-center gap-3 flex-wrap">
-                                <span className="text-xl font-black text-[#57068c]">
+                                <span className="text-xl font-bold text-brand">
                                   ${tx.listing?.price.toFixed(2)}
                                 </span>
-                                <span className="text-sm text-zinc-500">
+                                <span className="text-sm text-muted-foreground">
                                   × {tx.listing?.amount} swipe{Number(tx.listing?.amount) !== 1 ? "s" : ""}
                                 </span>
                                 {tx.listing?.type && (
-                                  <span className="text-xs bg-zinc-100 text-zinc-600 rounded-md px-2 py-0.5">
+                                  <span className="text-xs bg-muted text-muted-foreground rounded-md px-2 py-0.5">
                                     {tx.listing.type.type}
                                   </span>
                                 )}
                               </div>
                               {tx.listing?.location && (
-                                <div className="flex items-center gap-1 text-xs text-zinc-500">
-                                  <MapPin className="w-3 h-3 text-[#57068c]" />
+                                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                  <MapPin className="w-3 h-3 text-brand" />
                                   {tx.listing.location.location}
                                 </div>
                               )}
-                              <div className="flex items-center gap-3 flex-wrap text-xs text-zinc-400">
+                              <div className="flex items-center gap-3 flex-wrap text-xs text-muted-foreground">
                                 <div className="flex items-center gap-1">
                                   <User className="w-3 h-3" />
-                                  Buyer: <span className="font-medium text-zinc-600">
+                                  Buyer: <span className="font-medium text-foreground/80 ml-0.5">
                                     {tx.buyer
-                                      ? `${tx.buyer.first_name} ${tx.buyer.last_name} (${tx.buyer.net_id}@nyu.edu)`
-                                      : `${tx.buyer_id}@nyu.edu`}
+                                      ? `${[tx.buyer.first_name, tx.buyer.last_name].filter(Boolean).join(" ") || tx.buyer.net_id}`
+                                      : tx.buyer_id}
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-1">
@@ -401,19 +662,21 @@ export default function ProfilePage() {
                                 </div>
                               </div>
                               {tx.buyer_confirm && (
-                                <span className="text-[10px] text-emerald-600 font-medium">Buyer confirmed receipt ✓</span>
+                                <span className="text-[10px] text-emerald-500 dark:text-emerald-400 font-medium flex items-center gap-1">
+                                  <CheckCircle2 className="w-3 h-3" /> Buyer confirmed receipt
+                                </span>
                               )}
                             </div>
                             <div className="flex flex-col items-end gap-2">
-                              <span className={`text-xs font-semibold border rounded-full px-2.5 py-1 ${statusColor(statusName)}`}>
+                              <span className={`text-xs font-medium border rounded-full px-2.5 py-1 ${statusColor(statusName)}`}>
                                 {sellerStatusLabel(statusName)}
                               </span>
-                              {/* Seller actions */}
                               {isPending && (
                                 <div className="flex gap-1.5">
                                   <Button
                                     size="sm"
-                                    className="h-7 gap-1 bg-emerald-600 text-white hover:bg-emerald-700 dark:bg-emerald-500 dark:text-emerald-950 dark:hover:bg-emerald-400"
+                                    variant="success"
+                                    className="h-7 gap-1 text-xs"
                                     onClick={() => updateStatusMutation.mutate({ transactionId: tx.transaction_id, newStatus: "Confirmed" })}
                                     disabled={isUpdating}
                                   >
@@ -423,7 +686,7 @@ export default function ProfilePage() {
                                   <Button
                                     size="sm"
                                     variant="outline"
-                                    className="h-7 gap-1 border-red-200 text-red-500 hover:bg-red-50 dark:border-red-500/40 dark:text-red-300 dark:hover:bg-red-500/10"
+                                    className="h-7 gap-1 text-xs border-destructive/30 text-destructive hover:bg-destructive/10"
                                     onClick={() => updateStatusMutation.mutate({ transactionId: tx.transaction_id, newStatus: "Cancelled" })}
                                     disabled={isUpdating}
                                   >

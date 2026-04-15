@@ -128,35 +128,35 @@ export default function LoginPage() {
           initial={{ opacity: 0, y: 24, scale: 0.97 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="bg-white rounded-2xl shadow-2xl shadow-black/30 overflow-hidden"
+          className="bg-card rounded-2xl shadow-2xl shadow-black/30 overflow-hidden border border-border/40"
         >
           {/* Top accent */}
-          <div className="h-1.5 bg-gradient-to-r from-slate-700 via-slate-500 to-stone-500" />
+          <div className="h-1 bg-gradient-to-r from-brand to-brand-light" />
 
           <div className="p-7 flex flex-col gap-5">
             {/* Brand */}
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary shadow-lg shadow-slate-900/20">
-                <UtensilsCrossed className="w-5 h-5 text-white" />
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary">
+                <UtensilsCrossed className="w-4 h-4 text-primary-foreground" />
               </div>
               <div>
-                <h1 className="text-lg font-black text-zinc-900 leading-none">
+                <h1 className="text-base font-bold text-foreground leading-none">
                   Swipe<span className="text-primary">Market</span>
                 </h1>
-                <p className="text-xs text-zinc-400 mt-0.5">University meal swipe marketplace</p>
+                <p className="text-xs text-muted-foreground mt-0.5">University meal swipe marketplace</p>
               </div>
             </div>
 
             {/* Tabs */}
-            <div className="flex rounded-lg bg-zinc-100 p-1 gap-1">
+            <div className="flex rounded-lg bg-muted p-1 gap-1">
               {(["signin", "signup"] as Tab[]).map((t) => (
                 <button
                   key={t}
                   onClick={() => { setTab(t); setError(""); setSuccess("") }}
                   className={`flex-1 py-1.5 rounded-md text-sm font-semibold transition-all duration-150 cursor-pointer ${
                     tab === t
-                      ? "bg-white text-zinc-900 shadow-sm"
-                      : "text-zinc-500 hover:text-zinc-700"
+                      ? "bg-card text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
                   {t === "signin" ? "Sign In" : "Sign Up"}
@@ -171,7 +171,7 @@ export default function LoginPage() {
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
-                  className="flex items-start gap-2 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2.5 text-sm text-emerald-700"
+                  className="flex items-start gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-3 py-2.5 text-sm text-emerald-600 dark:text-emerald-400"
                 >
                   <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
                   {success}
@@ -183,11 +183,11 @@ export default function LoginPage() {
             <form onSubmit={handleSubmit} className="flex flex-col gap-3">
               {/* Email */}
               <div>
-                <label className="block text-xs font-medium text-zinc-600 mb-1.5">
+                <label className="block text-xs font-medium text-muted-foreground mb-1.5">
                   University Email
                 </label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 pointer-events-none" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
                   <Input
                     type="email"
                     placeholder="you@school.edu"
@@ -202,11 +202,11 @@ export default function LoginPage() {
 
               {/* Password */}
               <div>
-                <label className="block text-xs font-medium text-zinc-600 mb-1.5">
+                <label className="block text-xs font-medium text-muted-foreground mb-1.5">
                   Password
                 </label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 pointer-events-none" />
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
                   <Input
                     type={showPassword ? "text" : "password"}
                     placeholder={tab === "signup" ? "Min. 6 characters" : "Enter password"}
@@ -220,7 +220,7 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 transition-colors cursor-pointer"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -234,7 +234,7 @@ export default function LoginPage() {
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
-                    className="flex items-start gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2.5 text-sm text-red-600"
+                    className="flex items-start gap-2 bg-destructive/10 border border-destructive/20 rounded-lg px-3 py-2.5 text-sm text-destructive"
                   >
                     <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                     {error}
@@ -260,7 +260,7 @@ export default function LoginPage() {
 
             {/* Domain hint */}
             {tab === "signup" && (
-              <p className="text-xs text-zinc-400 text-center leading-relaxed">
+              <p className="text-xs text-muted-foreground text-center leading-relaxed">
                 Only approved university domains are accepted
                 <br />
                 (e.g. nyu.edu, illinois.edu, umich.edu)
