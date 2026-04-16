@@ -633,3 +633,102 @@ DELETE FROM domain WHERE email_domain = 'berkeley.edu';
 
 -- delete user
 DELETE FROM "user" WHERE net_id = 'ak7745';
+
+-- ============================================================
+-- notification table (real-time accepted-swipe notifications)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS notification (
+    notification_id   UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    recipient_net_id  TEXT        NOT NULL REFERENCES "user"(net_id) ON DELETE CASCADE,
+    transaction_id    UUID        NOT NULL REFERENCES transaction(transaction_id) ON DELETE CASCADE,
+    type              TEXT        NOT NULL DEFAULT 'swipe_accepted',
+    message           TEXT        NOT NULL,
+    is_read           BOOLEAN     NOT NULL DEFAULT FALSE,
+    created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS notification_recipient_idx
+    ON notification (recipient_net_id, created_at DESC);
+
+ALTER TABLE notification ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "notification_select_own" ON notification FOR SELECT
+    USING (recipient_net_id = split_part(auth.email(), '@', 1));
+CREATE POLICY "notification_no_direct_insert" ON notification FOR INSERT
+    WITH CHECK (FALSE);
+CREATE POLICY "notification_update_own_read" ON notification FOR UPDATE
+    USING  (recipient_net_id = split_part(auth.email(), '@', 1))
+    WITH CHECK (recipient_net_id = split_part(auth.email(), '@', 1));
+CREATE POLICY "notification_delete_own" ON notification FOR DELETE
+    USING (recipient_net_id = split_part(auth.email(), '@', 1));
+
+ALTER PUBLICATION supabase_realtime ADD TABLE notification;
+
+CREATE OR REPLACE FUNCTION notify_buyer_on_confirm()
+RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER AS $$
+DECLARE
+    v_confirmed_status_id UUID;
+    v_buyer_net_id        TEXT;
+    v_seller_net_id       TEXT;
+    v_location            TEXT;
+    v_price               REAL;
+    v_amount              TEXT;
+BEGIN
+    SELECT status_id INTO v_confirmed_status_id FROM status WHERE status_name = 'Confirmed';
+    IF NEW.status_id IS DISTINCT FROM v_confirmed_status_id THEN RETURN NEW; END IF;
+    IF OLD.status_id = v_confirmed_status_id THEN RETURN NEW; END IF;
+    SELECT t.buyer_id, l.seller_net_id, l.price, l.amount,
+           COALESCE(loc.location, 'the agreed location')
+    INTO   v_buyer_net_id, v_seller_net_id, v_price, v_amount, v_location
+    FROM transaction t
+    JOIN listing l ON t.listing_id = l.listing_id
+    LEFT JOIN location loc ON l.preferred_location_id = loc.location_id
+    WHERE t.transaction_id = NEW.transaction_id;
+    INSERT INTO notification (recipient_net_id, transaction_id, type, message)
+    VALUES (v_buyer_net_id, NEW.transaction_id, 'swipe_accepted',
+            format('%s accepted your request for %s swipe(s) at $%s — meet at %s.',
+                   v_seller_net_id, v_amount, v_price, v_location));
+    RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER on_transaction_confirmed
+AFTER UPDATE OF status_id ON transaction
+FOR EACH ROW EXECUTE FUNCTION notify_buyer_on_confirm();
+
+-- ============================================================
+-- message table (buyer ↔ seller per-transaction chat)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS message (
+    message_id      UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    transaction_id  UUID        NOT NULL REFERENCES transaction(transaction_id) ON DELETE CASCADE,
+    sender_net_id   TEXT        NOT NULL REFERENCES "user"(net_id),
+    content         TEXT        NOT NULL CHECK (char_length(content) BETWEEN 1 AND 1000),
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS message_transaction_idx
+    ON message (transaction_id, created_at ASC);
+
+ALTER TABLE message ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "message_select_participants" ON message FOR SELECT USING (
+    transaction_id IN (
+        SELECT t.transaction_id FROM transaction t
+        JOIN listing l ON t.listing_id = l.listing_id
+        WHERE t.buyer_id = split_part(auth.email(), '@', 1)
+           OR l.seller_net_id = split_part(auth.email(), '@', 1)
+    )
+);
+
+CREATE POLICY "message_insert_participants" ON message FOR INSERT WITH CHECK (
+    sender_net_id = split_part(auth.email(), '@', 1)
+    AND transaction_id IN (
+        SELECT t.transaction_id FROM transaction t
+        JOIN listing l ON t.listing_id = l.listing_id
+        WHERE t.buyer_id = split_part(auth.email(), '@', 1)
+           OR l.seller_net_id = split_part(auth.email(), '@', 1)
+    )
+);
+
+ALTER PUBLICATION supabase_realtime ADD TABLE message;

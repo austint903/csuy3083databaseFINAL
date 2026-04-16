@@ -9,6 +9,7 @@ import { ModeToggle } from "@/components/mode-toggle"
 import { createClient } from "@/utils/supabase/client"
 import { ShoppingCart, Tag, LogIn, LogOut, UtensilsCrossed, UserCircle } from "lucide-react"
 import type { User } from "@supabase/supabase-js"
+import { NotificationBell } from "@/components/NotificationBell"
 
 interface HeaderProps {
   user: User | null
@@ -107,6 +108,7 @@ export function Header({ user }: HeaderProps) {
         {/* Auth */}
         <div className="flex items-center gap-2 shrink-0">
           <ModeToggle />
+          {user && <NotificationBell />}
           <AnimatePresence mode="wait">
             {user ? (
               <motion.div

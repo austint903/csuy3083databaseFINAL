@@ -14,6 +14,7 @@ import {
   MapPin, Clock, ShoppingBag, Tag, CheckCircle2, XCircle,
   PackageCheck, User, Loader2, Star, Pencil, Save, X
 } from "lucide-react"
+import { TransactionChat } from "@/components/TransactionChat"
 
 interface Transaction {
   transaction_id: string
@@ -588,6 +589,14 @@ export default function ProfilePage() {
                                   <CheckCircle2 className="w-3 h-3" /> You confirmed
                                 </span>
                               )}
+                              {userId && (
+                                <TransactionChat
+                                  transactionId={tx.transaction_id}
+                                  currentNetId={userId}
+                                  otherPartyLabel={`${tx.listing?.seller_net_id ?? "seller"}`}
+                                  disabled={statusName === "Cancelled"}
+                                />
+                              )}
                             </div>
                           </div>
                         </CardContent>
@@ -705,6 +714,18 @@ export default function ProfilePage() {
                                   {isUpdating ? <Loader2 className="w-3 h-3 animate-spin" /> : <PackageCheck className="w-3 h-3" />}
                                   Mark Complete
                                 </Button>
+                              )}
+                              {userId && (
+                                <TransactionChat
+                                  transactionId={tx.transaction_id}
+                                  currentNetId={userId}
+                                  otherPartyLabel={
+                                    tx.buyer
+                                      ? `${[tx.buyer.first_name, tx.buyer.last_name].filter(Boolean).join(" ") || tx.buyer.net_id}`
+                                      : tx.buyer_id
+                                  }
+                                  disabled={statusName === "Cancelled"}
+                                />
                               )}
                             </div>
                           </div>
