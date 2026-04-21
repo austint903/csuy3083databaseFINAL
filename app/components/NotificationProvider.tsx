@@ -12,6 +12,14 @@ export interface AppNotification {
   created_at: string
 }
 
+export interface ChatMessageAlert {
+  message_id: string
+  transaction_id: string
+  sender_net_id: string
+  content: string
+  created_at: string
+}
+
 interface NotificationCtx {
   notifications: AppNotification[]
   unreadCount: number
@@ -20,6 +28,8 @@ interface NotificationCtx {
   clearAll: () => Promise<void>
   latestToast: AppNotification | null
   dismissToast: () => void
+  latestChatToast: ChatMessageAlert | null
+  dismissChatToast: () => void
 }
 
 const Ctx = createContext<NotificationCtx | null>(null)
@@ -33,6 +43,7 @@ export function NotificationProvider({
 }) {
   const [notifications, setNotifications] = useState<AppNotification[]>([])
   const [latestToast, setLatestToast] = useState<AppNotification | null>(null)
+  const [latestChatToast, setLatestChatToast] = useState<ChatMessageAlert | null>(null)
 
   // Initial fetch
   useEffect(() => {
@@ -99,13 +110,38 @@ export function NotificationProvider({
     setNotifications([])
   }, [netId])
 
+  // Realtime subscription for incoming chat messages
+  useEffect(() => {
+    if (!netId) return
+    const supabase = createClient()
+    const channel = supabase
+      .channel(`chat-alerts:${netId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "message",
+          filter: `sender_net_id=neq.${netId}`,
+        },
+        (payload) => {
+          setLatestChatToast(payload.new as ChatMessageAlert)
+        }
+      )
+      .subscribe()
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [netId])
+
   const dismissToast = useCallback(() => setLatestToast(null), [])
+  const dismissChatToast = useCallback(() => setLatestChatToast(null), [])
 
   const unreadCount = notifications.filter((n) => !n.is_read).length
 
   return (
     <Ctx.Provider
-      value={{ notifications, unreadCount, markAllRead, markOneRead, clearAll, latestToast, dismissToast }}
+      value={{ notifications, unreadCount, markAllRead, markOneRead, clearAll, latestToast, dismissToast, latestChatToast, dismissChatToast }}
     >
       {children}
     </Ctx.Provider>
