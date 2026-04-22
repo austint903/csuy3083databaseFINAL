@@ -10,7 +10,7 @@ import { ModeToggle } from "@/components/mode-toggle"
 import { createClient } from "@/utils/supabase/client"
 import {
   ArrowLeft, UtensilsCrossed, Loader2, AlertCircle,
-  CheckCircle2, Eye, EyeOff, Mail, Lock
+  CheckCircle2, Eye, EyeOff, Mail, Lock, User
 } from "lucide-react"
 
 type Tab = "signin" | "signup"
@@ -20,6 +20,8 @@ export default function LoginPage() {
   const [tab, setTab] = useState<Tab>("signin")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [firstName, setFirstName] = useState("")
+  const [lastName, setLastName] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
@@ -73,7 +75,7 @@ export default function LoginPage() {
       const netId = email.split("@")[0]
       if (data.user) {
         await supabase.from("user").upsert(
-          { net_id: netId, first_name: "", last_name: "", phone_number: "" },
+          { net_id: netId, first_name: firstName.trim(), last_name: lastName.trim(), phone_number: "" },
           { onConflict: "net_id", ignoreDuplicates: true }
         )
       }
@@ -152,7 +154,7 @@ export default function LoginPage() {
               {(["signin", "signup"] as Tab[]).map((t) => (
                 <button
                   key={t}
-                  onClick={() => { setTab(t); setError(""); setSuccess("") }}
+                  onClick={() => { setTab(t); setError(""); setSuccess(""); setFirstName(""); setLastName("") }}
                   className={`flex-1 py-1.5 rounded-md text-sm font-semibold transition-all duration-150 cursor-pointer ${
                     tab === t
                       ? "bg-card text-foreground shadow-sm"
@@ -199,6 +201,42 @@ export default function LoginPage() {
                   />
                 </div>
               </div>
+
+              {/* First / Last name (sign-up only) */}
+              {tab === "signup" && (
+                <div className="flex gap-2">
+                  <div className="flex-1">
+                    <label className="block text-xs font-medium text-muted-foreground mb-1.5">
+                      First Name
+                    </label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                      <Input
+                        type="text"
+                        placeholder="First"
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        className="pl-9"
+                        required
+                        autoComplete="given-name"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <label className="block text-xs font-medium text-muted-foreground mb-1.5">
+                      Last Name
+                    </label>
+                    <Input
+                      type="text"
+                      placeholder="Last"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      required
+                      autoComplete="family-name"
+                    />
+                  </div>
+                </div>
+              )}
 
               {/* Password */}
               <div>

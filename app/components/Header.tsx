@@ -13,9 +13,10 @@ import { NotificationBell } from "@/components/NotificationBell"
 
 interface HeaderProps {
   user: User | null
+  displayName?: string | null
 }
 
-export function Header({ user }: HeaderProps) {
+export function Header({ user, displayName }: HeaderProps) {
   const pathname = usePathname()
   const router = useRouter()
   const [pendingCount, setPendingCount] = useState(0)
@@ -122,11 +123,11 @@ export function Header({ user }: HeaderProps) {
                   <div className="hidden cursor-pointer items-center gap-2 rounded-lg bg-secondary px-3 py-1.5 transition-colors hover:bg-secondary/80 sm:flex">
                     <div className="flex h-5 w-5 items-center justify-center rounded-full bg-primary">
                       <span className="text-white text-xs font-bold">
-                        {user.email?.[0].toUpperCase()}
+                        {(displayName ?? user.email ?? "?")[0].toUpperCase()}
                       </span>
                     </div>
                     <span className="text-xs font-semibold text-foreground/80">
-                      {user.email ?? netId}
+                      {displayName ?? user.email}
                     </span>
                   </div>
                 </Link>

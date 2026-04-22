@@ -333,8 +333,8 @@ export default function ProfilePage() {
 
   const commentByTxId = new Map(comments.map((c) => [c.transaction_id, c]))
   const displayName = userProfile
-    ? [userProfile.first_name, userProfile.last_name].filter(Boolean).join(" ") || userId
-    : userId
+    ? [userProfile.first_name, userProfile.last_name].filter(Boolean).join(" ") || userEmail || userId
+    : userEmail || userId
 
   return (
     <div className="min-h-screen bg-background">
