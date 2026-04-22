@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { motion, AnimatePresence, type Variants } from "framer-motion"
 import { Card, CardContent } from "@/components/ui/card"
@@ -100,6 +100,7 @@ export default function BuyPage() {
   const [priceMax, setPriceMax] = useState(20)
   const [pendingPriceMax, setPendingPriceMax] = useState(20)
   const [sortBy, setSortBy] = useState<SortOption>("newest")
+  const [locationFilter, setLocationFilter] = useState("")
   const [showFilters, setShowFilters] = useState(false)
   const [userId, setUserId] = useState<string | null>(null)
   const [buyingListing, setBuyingListing] = useState<Listing | null>(null)
@@ -154,6 +155,18 @@ export default function BuyPage() {
     },
   })
 
+  const allLocations = useMemo(() => {
+    const seen = new Set<string>()
+    const result: string[] = []
+    listings.forEach((l) => {
+      if (l.location?.location && !seen.has(l.location.location)) {
+        seen.add(l.location.location)
+        result.push(l.location.location)
+      }
+    })
+    return result.sort()
+  }, [listings])
+
   const sorted = [...listings].sort((a, b) => {
     switch (sortBy) {
       case "price_asc": return a.price - b.price
@@ -164,7 +177,11 @@ export default function BuyPage() {
     }
   })
 
-  const filtered = sorted.filter((l) => l.price <= priceMax && l.seller_net_id !== userId)
+  const filtered = sorted.filter((l) =>
+    l.price <= priceMax &&
+    l.seller_net_id !== userId &&
+    (!locationFilter || l.location?.location === locationFilter)
+  )
 
   const cardVariants: Variants = {
     hidden: { opacity: 0, y: 16 },
@@ -282,7 +299,9 @@ export default function BuyPage() {
               Available Swipes
             </h1>
             <p className="mt-0.5 text-sm text-muted-foreground">
-              {isLoading ? "Loading listings…" : `${filtered.length} listing${filtered.length !== 1 ? "s" : ""} available`}
+              {isLoading
+                ? "Loading listings…"
+                : `${filtered.length} listing${filtered.length !== 1 ? "s" : ""} available${locationFilter ? ` at ${locationFilter}` : ""}`}
             </p>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
@@ -336,7 +355,21 @@ export default function BuyPage() {
                   />
                   <p className="mt-1 text-xs text-muted-foreground">Press Enter to apply</p>
                 </div>
-                <Button variant="outline" size="sm" onClick={() => { setPriceMax(20); setPendingPriceMax(20) }}>
+                <div className="min-w-52">
+                  <label className="mb-2 block text-xs font-medium text-muted-foreground">Location</label>
+                  <Select value={locationFilter || "__all__"} onValueChange={(v) => setLocationFilter(v === "__all__" ? "" : v)}>
+                    <SelectTrigger className="w-full text-sm h-9">
+                      <SelectValue placeholder="All locations" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__all__">All locations</SelectItem>
+                      {allLocations.map((loc) => (
+                        <SelectItem key={loc} value={loc}>{loc}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => { setPriceMax(20); setPendingPriceMax(20); setLocationFilter("") }}>
                   Reset
                 </Button>
               </div>

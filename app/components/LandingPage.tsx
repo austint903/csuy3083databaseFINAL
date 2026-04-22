@@ -238,45 +238,6 @@ export function LandingPage({ isLoggedIn }: LandingPageProps) {
         </motion.div>
       </section>
 
-      {/* Coming soon: SSO + Messaging */}
-      <section className="bg-background px-6 py-16">
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.4 }}
-          className="mx-auto max-w-5xl"
-        >
-          <div className="text-center mb-10">
-            <h2 className="text-xl font-black text-foreground">Coming Soon</h2>
-            <p className="mt-1.5 text-sm text-muted-foreground">Features we're working on</p>
-          </div>
-          <div className="grid sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
-            <Card className="border-border bg-card border-dashed">
-              <CardContent className="p-5 flex items-start gap-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-muted">
-                  <Shield className="h-4 w-4 text-muted-foreground" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-semibold text-foreground">University SSO</h3>
-                  <p className="text-xs text-muted-foreground mt-0.5">Sign in seamlessly with your university single sign-on credentials.</p>
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="border-border bg-card border-dashed">
-              <CardContent className="p-5 flex items-start gap-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-muted">
-                  <MessageSquare className="h-4 w-4 text-muted-foreground" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-semibold text-foreground">In-App Messaging</h3>
-                  <p className="text-xs text-muted-foreground mt-0.5">Chat directly with buyers and sellers to coordinate meetups.</p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </motion.div>
-      </section>
 
       {/* CTA */}
       <section className="bg-gradient-to-br from-slate-900 via-slate-800 to-stone-900 px-6 py-20 text-center">
