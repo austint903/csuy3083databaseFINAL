@@ -10,12 +10,14 @@ export interface AppNotification {
   message: string
   is_read: boolean
   created_at: string
+  metadata?: Record<string, string> | null
 }
 
 export interface ChatMessageAlert {
-  message_id: string
+  notification_id: string
   transaction_id: string
   sender_net_id: string
+  sender_first_name: string
   content: string
   created_at: string
 }
@@ -33,6 +35,17 @@ interface NotificationCtx {
 }
 
 const Ctx = createContext<NotificationCtx | null>(null)
+
+function toChatAlert(n: AppNotification): ChatMessageAlert {
+  return {
+    notification_id: n.notification_id,
+    transaction_id: n.transaction_id,
+    sender_net_id: n.metadata?.sender_net_id ?? "unknown",
+    sender_first_name: n.metadata?.sender_first_name ?? n.metadata?.sender_net_id ?? "Someone",
+    content: n.message,
+    created_at: n.created_at,
+  }
+}
 
 export function NotificationProvider({
   children,
@@ -58,7 +71,7 @@ export function NotificationProvider({
       })
   }, [netId])
 
-  // Realtime subscription
+  // Single Realtime subscription — all notification types come through here
   useEffect(() => {
     if (!netId) return
     const supabase = createClient()
@@ -75,7 +88,12 @@ export function NotificationProvider({
         (payload) => {
           const n = payload.new as AppNotification
           setNotifications((prev) => [n, ...prev])
-          setLatestToast(n)
+          if (n.type === "new_message") {
+            setLatestChatToast(toChatAlert(n))
+          } else {
+            // covers 'swipe_accepted' and 'new_purchase'
+            setLatestToast(n)
+          }
         }
       )
       .subscribe()
@@ -110,30 +128,6 @@ export function NotificationProvider({
     setNotifications([])
   }, [netId])
 
-  // Realtime subscription for incoming chat messages
-  useEffect(() => {
-    if (!netId) return
-    const supabase = createClient()
-    const channel = supabase
-      .channel(`chat-alerts:${netId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "message",
-          filter: `sender_net_id=neq.${netId}`,
-        },
-        (payload) => {
-          setLatestChatToast(payload.new as ChatMessageAlert)
-        }
-      )
-      .subscribe()
-    return () => {
-      supabase.removeChannel(channel)
-    }
-  }, [netId])
-
   const dismissToast = useCallback(() => setLatestToast(null), [])
   const dismissChatToast = useCallback(() => setLatestChatToast(null), [])
 
@@ -141,7 +135,17 @@ export function NotificationProvider({
 
   return (
     <Ctx.Provider
-      value={{ notifications, unreadCount, markAllRead, markOneRead, clearAll, latestToast, dismissToast, latestChatToast, dismissChatToast }}
+      value={{
+        notifications,
+        unreadCount,
+        markAllRead,
+        markOneRead,
+        clearAll,
+        latestToast,
+        dismissToast,
+        latestChatToast,
+        dismissChatToast,
+      }}
     >
       {children}
     </Ctx.Provider>

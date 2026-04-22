@@ -67,7 +67,7 @@ export function NotificationBell() {
         </AnimatePresence>
       </button>
 
-      {/* Toast pop-up */}
+      {/* Notification toast (swipe_accepted / new_purchase) */}
       <AnimatePresence>
         {latestToast && (
           <motion.div
@@ -83,7 +83,9 @@ export function NotificationBell() {
                 <Bell className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-zinc-900 dark:text-white">Swipe Accepted!</p>
+                <p className="text-sm font-bold text-zinc-900 dark:text-white">
+                  {latestToast.type === "new_purchase" ? "New Purchase Request!" : "Swipe Accepted!"}
+                </p>
                 <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2">
                   {latestToast.message}
                 </p>
@@ -105,11 +107,11 @@ export function NotificationBell() {
         )}
       </AnimatePresence>
 
-      {/* Chat toast pop-up */}
+      {/* Chat message toast */}
       <AnimatePresence>
         {latestChatToast && (
           <motion.div
-            key={latestChatToast.message_id}
+            key={latestChatToast.notification_id}
             initial={{ opacity: 0, y: -8, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.95 }}
@@ -122,7 +124,7 @@ export function NotificationBell() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-bold text-zinc-900 dark:text-white">
-                  New message from {latestChatToast.sender_net_id}
+                  New message from {latestChatToast.sender_first_name}
                 </p>
                 <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2">
                   {latestChatToast.content}
