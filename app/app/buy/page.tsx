@@ -98,7 +98,7 @@ export default function BuyPage() {
   const queryClient = useQueryClient()
   const router = useRouter()
   const [priceMax, setPriceMax] = useState(Infinity)
-  const [pendingPriceMax, setPendingPriceMax] = useState(20)
+  const [sliderValue, setSliderValue] = useState(20)
   const [sortBy, setSortBy] = useState<SortOption>("newest")
   const [locationFilter, setLocationFilter] = useState("")
   const [showFilters, setShowFilters] = useState(false)
@@ -167,17 +167,23 @@ export default function BuyPage() {
     return result.sort()
   }, [listings])
 
-  const maxListingPrice = useMemo(() =>
-    listings.length > 0 ? Math.ceil(Math.max(...listings.map((l) => l.price))) : 20,
-    [listings]
-  )
+  const maxListingPrice = useMemo(() => {
+    if (listings.length === 0) return 20
+    const prices = listings.map((l) => l.price).filter((p) => Number.isFinite(p) && p > 0 && p <= 10000)
+    return prices.length > 0 ? Math.ceil(Math.max(...prices)) : 20
+  }, [listings])
 
   useEffect(() => {
     if (listings.length > 0 && priceMax === Infinity) {
       setPriceMax(maxListingPrice)
-      setPendingPriceMax(maxListingPrice)
+      setSliderValue(maxListingPrice)
     }
   }, [listings.length, maxListingPrice, priceMax])
+
+  useEffect(() => {
+    const timer = setTimeout(() => setPriceMax(sliderValue), 300)
+    return () => clearTimeout(timer)
+  }, [sliderValue])
 
   const sorted = [...listings].sort((a, b) => {
     switch (sortBy) {
@@ -354,18 +360,16 @@ export default function BuyPage() {
               <div className="max-w-7xl mx-auto px-6 py-4 flex flex-wrap gap-6 items-end">
                 <div className="min-w-56">
                   <label className="mb-2 block text-xs font-medium text-muted-foreground">
-                    Max Price: <span className="text-brand font-semibold">${pendingPriceMax}</span>{pendingPriceMax !== priceMax && <span className="text-muted-foreground"> (applied: ${priceMax})</span>}
+                    Max Price: <span className="text-brand font-semibold">${sliderValue}</span>
                   </label>
                   <Slider
-                    value={pendingPriceMax}
+                    value={sliderValue}
                     min={1}
                     max={maxListingPrice}
-                    step={0.5}
-                    onChange={(e) => setPendingPriceMax(Number(e.target.value))}
-                    onKeyDown={(e) => { if (e.key === "Enter") setPriceMax(pendingPriceMax) }}
+                    step={1}
+                    onChange={(e) => setSliderValue(Number(e.target.value))}
                     className="w-full"
                   />
-                  <p className="mt-1 text-xs text-muted-foreground">Press Enter to apply</p>
                 </div>
                 <div className="min-w-52">
                   <label className="mb-2 block text-xs font-medium text-muted-foreground">Location</label>
@@ -381,7 +385,7 @@ export default function BuyPage() {
                     </SelectContent>
                   </Select>
                 </div>
-                <Button variant="outline" size="sm" onClick={() => { setPriceMax(maxListingPrice); setPendingPriceMax(maxListingPrice); setLocationFilter("") }}>
+                <Button variant="outline" size="sm" onClick={() => { setPriceMax(maxListingPrice); setSliderValue(maxListingPrice); setLocationFilter("") }}>
                   Reset
                 </Button>
               </div>
