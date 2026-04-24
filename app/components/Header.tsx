@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { ModeToggle } from "@/components/mode-toggle"
 import { createClient } from "@/utils/supabase/client"
-import { ShoppingCart, Tag, LogIn, LogOut, UtensilsCrossed, UserCircle } from "lucide-react"
+import { ShoppingCart, Tag, LogIn, LogOut, UtensilsCrossed, UserCircle, BookOpen } from "lucide-react"
 import type { User } from "@supabase/supabase-js"
 import { NotificationBell } from "@/components/NotificationBell"
 
@@ -59,6 +59,7 @@ export function Header({ user, displayName }: HeaderProps) {
   const navLinks = [
     { href: "/buy",  label: "Buy Swipes",  icon: ShoppingCart, badge: 0 },
     { href: "/sell", label: "Sell Swipes", icon: Tag,          badge: 0 },
+    { href: "/menu", label: "Menu",        icon: BookOpen,     badge: 0 },
     ...(user ? [{ href: "/profile", label: "Profile", icon: UserCircle, badge: pendingCount }] : []),
   ]
 

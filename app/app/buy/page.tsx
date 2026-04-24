@@ -97,7 +97,7 @@ function ListingCardSkeleton() {
 export default function BuyPage() {
   const queryClient = useQueryClient()
   const router = useRouter()
-  const [priceMax, setPriceMax] = useState(20)
+  const [priceMax, setPriceMax] = useState(Infinity)
   const [pendingPriceMax, setPendingPriceMax] = useState(20)
   const [sortBy, setSortBy] = useState<SortOption>("newest")
   const [locationFilter, setLocationFilter] = useState("")
@@ -166,6 +166,18 @@ export default function BuyPage() {
     })
     return result.sort()
   }, [listings])
+
+  const maxListingPrice = useMemo(() =>
+    listings.length > 0 ? Math.ceil(Math.max(...listings.map((l) => l.price))) : 20,
+    [listings]
+  )
+
+  useEffect(() => {
+    if (listings.length > 0 && priceMax === Infinity) {
+      setPriceMax(maxListingPrice)
+      setPendingPriceMax(maxListingPrice)
+    }
+  }, [listings.length, maxListingPrice, priceMax])
 
   const sorted = [...listings].sort((a, b) => {
     switch (sortBy) {
@@ -347,7 +359,7 @@ export default function BuyPage() {
                   <Slider
                     value={pendingPriceMax}
                     min={1}
-                    max={20}
+                    max={maxListingPrice}
                     step={0.5}
                     onChange={(e) => setPendingPriceMax(Number(e.target.value))}
                     onKeyDown={(e) => { if (e.key === "Enter") setPriceMax(pendingPriceMax) }}
@@ -369,7 +381,7 @@ export default function BuyPage() {
                     </SelectContent>
                   </Select>
                 </div>
-                <Button variant="outline" size="sm" onClick={() => { setPriceMax(20); setPendingPriceMax(20); setLocationFilter("") }}>
+                <Button variant="outline" size="sm" onClick={() => { setPriceMax(maxListingPrice); setPendingPriceMax(maxListingPrice); setLocationFilter("") }}>
                   Reset
                 </Button>
               </div>

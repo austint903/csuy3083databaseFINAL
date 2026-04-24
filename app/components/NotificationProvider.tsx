@@ -71,7 +71,6 @@ export function NotificationProvider({
       })
   }, [netId])
 
-  // Single Realtime subscription — all notification types come through here
   useEffect(() => {
     if (!netId) return
     const supabase = createClient()
