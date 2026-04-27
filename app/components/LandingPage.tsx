@@ -45,12 +45,6 @@ const features = [
   },
 ]
 
-const stats = [
-  { value: "500+", label: "Active Students" },
-  { value: "$3–7", label: "Avg Swipe Price" },
-  { value: "1,200+", label: "Swipes Traded" },
-  { value: "4.9★", label: "Avg Rating" },
-]
 
 interface LandingPageProps {
   isLoggedIn: boolean
@@ -147,24 +141,6 @@ export function LandingPage({ isLoggedIn }: LandingPageProps) {
               </Button>
             </Link>
           </motion.div>
-        </motion.div>
-      </section>
-
-      {/* Stats */}
-      <section className="border-b border-border bg-card">
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.4 }}
-          className="mx-auto grid max-w-4xl grid-cols-2 gap-6 px-6 py-10 md:grid-cols-4 md:gap-0 md:divide-x md:divide-border"
-        >
-          {stats.map((s) => (
-            <div key={s.label} className="px-4 text-center">
-              <div className="text-2xl font-black text-brand">{s.value}</div>
-              <div className="mt-0.5 text-xs text-muted-foreground">{s.label}</div>
-            </div>
-          ))}
         </motion.div>
       </section>
 
