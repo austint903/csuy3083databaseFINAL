@@ -175,6 +175,58 @@ BEGIN
 END;
 $$;
 
+-- purchase_listing: atomic buy that prevents double-purchasing
+-- uses SELECT FOR UPDATE to lock the row, then checks active + no existing open transaction
+CREATE OR REPLACE FUNCTION purchase_listing(p_listing_id UUID)
+RETURNS UUID
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+    v_buyer_net_id      TEXT;
+    v_listing           listing%ROWTYPE;
+    v_pending_status_id UUID;
+    v_transaction_id    UUID;
+    v_open_count        INT;
+BEGIN
+    v_buyer_net_id := split_part(auth.email(), '@', 1);
+
+    INSERT INTO "user" (net_id, first_name, last_name, phone_number)
+    VALUES (v_buyer_net_id, '', '', '')
+    ON CONFLICT (net_id) DO NOTHING;
+
+    SELECT * INTO v_listing FROM listing WHERE listing_id = p_listing_id FOR UPDATE;
+
+    IF NOT FOUND OR NOT v_listing.is_active THEN
+        RAISE EXCEPTION 'listing_unavailable';
+    END IF;
+
+    IF v_listing.seller_net_id = v_buyer_net_id THEN
+        RAISE EXCEPTION 'cannot_buy_own_listing';
+    END IF;
+
+    SELECT COUNT(*) INTO v_open_count
+    FROM transaction t
+    JOIN status s ON t.status_id = s.status_id
+    WHERE t.listing_id = p_listing_id
+      AND s.status_name NOT IN ('Cancelled', 'Completed');
+
+    IF v_open_count > 0 THEN
+        RAISE EXCEPTION 'listing_unavailable';
+    END IF;
+
+    SELECT status_id INTO v_pending_status_id FROM status WHERE status_name = 'Pending';
+
+    INSERT INTO transaction (buyer_id, listing_id, status_id, buyer_confirm, seller_confirm)
+    VALUES (v_buyer_net_id, p_listing_id, v_pending_status_id, FALSE, FALSE)
+    RETURNING transaction_id INTO v_transaction_id;
+
+    RETURN v_transaction_id;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.purchase_listing(UUID) TO authenticated;
+
 -- select queries
 
 -- curr active listings
