@@ -65,17 +65,39 @@ function compactHours(hours: Record<string, string>): { label: string; value: st
   return rows
 }
 
-async function fetchHalls(today: string): Promise<DiningHall[]> {
+async function fetchHalls(today: string): Promise<{ halls: DiningHall[]; date: string }> {
   const supabase = createClient()
 
-  // Get halls that have menu data today
-  const { data: menuRows } = await supabase
+  let { data: menuRows } = await supabase
     .from("dining_menu")
     .select("hall_name, hall_slug")
     .eq("date", today)
     .order("hall_name")
 
-  if (!menuRows?.length) return []
+  let usedDate = today
+
+  // Fall back to most recent available date if today has no data
+  if (!menuRows?.length) {
+    const { data: latestRow } = await supabase
+      .from("dining_menu")
+      .select("date")
+      .order("date", { ascending: false })
+      .limit(1)
+      .single()
+
+    if (!latestRow) return { halls: [], date: today }
+
+    usedDate = latestRow.date
+    const { data: fallbackRows } = await supabase
+      .from("dining_menu")
+      .select("hall_name, hall_slug")
+      .eq("date", usedDate)
+      .order("hall_name")
+
+    menuRows = fallbackRows
+  }
+
+  if (!menuRows?.length) return { halls: [], date: today }
 
   const seen = new Set<string>()
   const unique = (menuRows as DiningHall[]).filter(r => {
@@ -96,7 +118,7 @@ async function fetchHalls(today: string): Promise<DiningHall[]> {
     hoursMap[h.slug] = h.hours
   }
 
-  return unique.map(r => ({ ...r, hours: hoursMap[r.hall_slug] ?? null }))
+  return { halls: unique.map(r => ({ ...r, hours: hoursMap[r.hall_slug] ?? null })), date: usedDate }
 }
 
 async function fetchMealPeriods(today: string, hallSlug: string): Promise<string[]> {
@@ -156,23 +178,26 @@ export default function MenuPage() {
   const [selectedHall, setSelectedHall] = useState<string | null>(null)
   const [selectedMeal, setSelectedMeal] = useState<string | null>(null)
 
-  const { data: halls = [], isLoading: hallsLoading } = useQuery({
+  const { data: hallsResult, isLoading: hallsLoading } = useQuery({
     queryKey: ["dining_halls", today],
     queryFn: () => fetchHalls(today),
     staleTime: 1000 * 60 * 30,
   })
 
+  const halls = hallsResult?.halls ?? []
+  const resolvedDate = hallsResult?.date ?? today
+
   const { data: mealPeriods = [], isLoading: periodsLoading } = useQuery({
-    queryKey: ["dining_meal_periods", today, selectedHall],
-    queryFn: () => fetchMealPeriods(today, selectedHall!),
-    enabled: !!selectedHall,
+    queryKey: ["dining_meal_periods", resolvedDate, selectedHall],
+    queryFn: () => fetchMealPeriods(resolvedDate, selectedHall!),
+    enabled: !!selectedHall && !!resolvedDate,
     staleTime: 1000 * 60 * 30,
   })
 
   const { data: items = [], isLoading: menuLoading } = useQuery({
-    queryKey: ["dining_menu", today, selectedHall, selectedMeal],
-    queryFn: () => fetchMenu(today, selectedHall!, selectedMeal!),
-    enabled: !!selectedHall && !!selectedMeal,
+    queryKey: ["dining_menu", resolvedDate, selectedHall, selectedMeal],
+    queryFn: () => fetchMenu(resolvedDate, selectedHall!, selectedMeal!),
+    enabled: !!selectedHall && !!selectedMeal && !!resolvedDate,
     staleTime: 1000 * 60 * 30,
   })
 
@@ -198,6 +223,11 @@ export default function MenuPage() {
         <div className="mb-8 flex items-start justify-between gap-4 flex-wrap">
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-foreground">NYU Dining Menus</h1>
+            {resolvedDate && resolvedDate !== today && (
+              <p className="text-xs text-muted-foreground mt-1">
+                Showing menu for {formatDate(resolvedDate)} — today's menu isn't available yet.
+              </p>
+            )}
           </div>
           <Badge variant="outline" className="text-xs shrink-0 mt-1 gap-1">
             <UtensilsCrossed className="w-3 h-3" />
